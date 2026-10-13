@@ -1,6 +1,7 @@
 import { proveBestQuote, selectWinner, verifyBestQuote } from "@niskala/zk";
 import { abi, addWallet, batchCall, normalizeRfq, readDomain, sendTx, Status, web3, type ChainRfq } from "./chain.ts";
 import { config } from "./config.ts";
+import { historyEnabled } from "./history.ts";
 import { makers, makerByAddress } from "./makers.ts";
 import { pools, type Pool } from "./pools.ts";
 import { referenceMidE6 } from "./prices.ts";
@@ -205,10 +206,12 @@ async function refreshStats(pool: Pool) {
 
 async function processRound(pool: Pool, st: PoolState, rfq: ChainRfq) {
   const round = ensureRound(pool.slug, rfq.rfqId);
-  if (!round.createTxHash) void recordEventTx(pool, rfq, round, "RfqCreated", "createTxHash");
+  if (!historyEnabled && !round.createTxHash) void recordEventTx(pool, rfq, round, "RfqCreated", "createTxHash");
   if (rfq.status === Status.SETTLED || rfq.status === Status.CANCELLED) {
     if (!round.final) updateRound(pool.slug, rfq.rfqId, { final: { status: rfq.status, usdcPaid: rfq.usdcPaid, winningPriceE6: rfq.winningPriceE6, amountOut: rfq.amountOut } });
-    if (rfq.status === Status.SETTLED && !round.settleTxHash) {
+    if (historyEnabled) {
+      st.active.delete(rfq.rfqId);
+    } else if (rfq.status === Status.SETTLED && !round.settleTxHash) {
       void recordEventTx(pool, rfq, round, "RfqSettled", "settleTxHash");
     } else if (round.createTxHash || round.scan?.RfqCreated !== undefined) {
       st.active.delete(rfq.rfqId);

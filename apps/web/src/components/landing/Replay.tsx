@@ -50,7 +50,7 @@ function rowsFrom(v: RoundView | null): Row[] {
     { label: "RFQ opened", actor: "trader", detail: `buy ${fmtUnits(chain?.amountOut ?? FALLBACK.amountOut, 18, 0)} WETH with USDC`, tx: off?.createTxHash ?? FALLBACK.createTx, tone: "neutral" },
     ...commits.map((c) => ({ label: "Sealed commitment", actor: c.name, detail: "hash onchain · 10 WETH locked", tx: c.tx, tone: "pending" as const })),
     { label: "Window closed", actor: "contract", detail: `${commits.length} / ${commits.length} · set is final`, tone: "neutral" },
-    { label: "Proof verified", actor: "HonkVerifier", detail: `${off?.proof?.proofBytes ?? FALLBACK.proofBytes} B · ${((off?.proof?.proveMs ?? FALLBACK.proveMs) / 1000).toFixed(1)} s · ${((off?.proof?.gasUsed ?? FALLBACK.gasUsed) / 1e6).toFixed(1)} M gas`, tx: off?.proof?.txHash ?? FALLBACK.proofTx, tone: "verified" },
+    { label: "Proof verified", actor: "HonkVerifier", detail: `${off?.proof?.proofBytes || FALLBACK.proofBytes} B · ${((off?.proof?.proveMs || FALLBACK.proveMs) / 1000).toFixed(1)} s · ${((off?.proof?.gasUsed || FALLBACK.gasUsed) / 1e6).toFixed(1)} M gas`, tx: off?.proof?.txHash ?? FALLBACK.proofTx, tone: "verified" },
     { label: "Best price revealed", actor: winnerName, detail: `${fmtPriceE6(chain?.winningPriceE6 ?? FALLBACK.winningPriceE6)} USDC per WETH · ${losers} prices stay sealed`, tone: "verified" },
     { label: "Settled", actor: "trader", detail: `${fmtUnits(chain?.usdcPaid ?? FALLBACK.usdcPaid, 6, 2)} USDC ↔ 10 WETH`, tx: off?.settleTxHash ?? FALLBACK.settleTx, tone: "verified" },
   ];

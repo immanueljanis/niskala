@@ -37,6 +37,12 @@ Full redesign of every surface after the TrustFlow reference: light palette with
 no borders, tonal tiles, white overlap card, same canvas hero in light tones. See `DESIGN.md` and `docs/DESIGN-REVIEW.md` (v3).
 Screenshots `docs/screenshots/v3-*.png`. Typecheck, build and verifier pass; no console errors; no overflow at 390 px.
 
+## History v1 (2026-10-14, Envio HyperSync)
+`apps/coordinator/src/history.ts`: paginated HyperSync query over all markets (5 events + submitProof calldata + block times),
+idempotent fold into round records, 20 s sync with 64-block overlap; windowed eth_getLogs stays as fallback without a token.
+Enabled with `ENVIO_API_TOKEN` (Railway). Native client has no Windows binding: lazy import, decode tests run everywhere.
+Submitted for the "Best Use of Envio" bounty.
+
 ## SDK v1 (2026-10-13)
 `packages/sdk` (`@niskala/sdk`): `Niskala` client (trader + reads, Web3.js v4, injected or key), `CoordinatorClient`,
 `@niskala/sdk/maker` (Poseidon2 commitment, signed opening protocol, `MakerClient`), `@niskala/sdk/prover` (re-exports zk).

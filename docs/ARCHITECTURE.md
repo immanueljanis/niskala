@@ -91,6 +91,15 @@ The watcher polls every 1 s with one batched `eth_call` request for every pool's
 hashes for the receipt (`RfqCreated`, `RfqSettled`) are found with `eth_getLogs` in 100-block windows, because the public
 Monad RPC rejects wider ranges; the scan cursor is persisted per round so it resumes instead of re-scanning.
 
+With `ENVIO_API_TOKEN` set, that scan is replaced by **Envio HyperSync** (`src/history.ts`): one paginated query over
+all market addresses and the five round events (`RfqCreated`, `QuoteCommitted`, `BestExecutionProven`, `RfqSettled`,
+`RfqCancelled`) from `HISTORY_FROM_BLOCK`, with the matching transactions (`submitProof` input and gas) and block
+timestamps joined in. Events are folded idempotently into the round records: commit transactions for every maker
+including external SDK makers, the proof bytes and verification gas recovered from calldata, settlement and
+cancellation snapshots that feed the pool statistics. The sync runs at boot and every 20 s with a 64-block overlap,
+so a fresh coordinator (new host, wiped volume) reconstructs the complete history instead of inheriting a data file.
+Public inputs for proofs this host did not generate are rebuilt from the contract's `publicInputs()` view on first read.
+
 ## Frontend data flow
 
 - `useRound` polls the coordinator every 1.5 s; if it is unreachable, falls back to `getRfq` over the public RPC

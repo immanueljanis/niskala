@@ -116,6 +116,7 @@ Full receipt and proof inspector: https://niskala-nu.vercel.app/rfq/weth-usdc/2
 | Proving | `@aztec/bb.js` UltraHonk (EVM/keccak target) through `@noir-lang/noir_wasm`; no native binaries |
 | Contracts | Foundry: `RfqMarket.sol`, generated `HonkVerifier.sol`, `MockERC20.sol`; 26 tests with real proof fixtures |
 | Coordinator | Node 24, Web3.js v4, multi-endpoint RPC routing with per-endpoint rate limits, batched reads, local nonces |
+| History | Envio HyperSync: every market event across all eight markets in one paginated query, plus the `submitProof` calldata and block times, folded into round records (commit txs, proof bytes and gas, settlement). A fresh host rebuilds the full history in seconds; no 100-block `eth_getLogs` windows |
 | Web | Next.js 16, Tailwind 4, Web3.js v4 isolated in the SDK, three.js hero, Playwright-driven wallet e2e |
 | SDK | `@niskala/sdk`: trader, reader, maker (`/maker`), prover (`/prover`) |
 

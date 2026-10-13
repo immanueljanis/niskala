@@ -81,9 +81,20 @@ analytics. No token.
 
 ## Sponsor bounties
 
-None selected. Niskala does not integrate the sponsors' products (Envio, Alchemy, Privy, Dynamic, Kuru, Perpl,
-Chainlink CRE, Nansen, Agora, Mera, Aurora), and we do not want to claim a bounty for a last-day integration.
-If the platform asks, the honest fit is only the track prize.
+**Best Use of Envio.** The coordinator's round history is served by Envio HyperSync on Monad testnet
+(`apps/coordinator/src/history.ts`). One paginated query over all eight market contracts returns every round event
+(`RfqCreated`, `QuoteCommitted`, `BestExecutionProven`, `RfqSettled`, `RfqCancelled`) with the `submitProof`
+transaction inputs and block timestamps joined in. From that the coordinator rebuilds, for every round on every
+market: the commitment transactions of every maker including external SDK makers, the proof bytes and verification
+gas recovered from calldata, settlement and cancellation snapshots that drive the pool statistics on the landing
+page and terminal. This replaced the previous `eth_getLogs` scanner, which the public Monad RPC caps at 100 blocks
+per call and which only knew about rounds the running process had seen. A fresh coordinator now reconstructs the
+whole history in seconds; the production coordinator on Railway runs with it enabled.
+
+**Best Community Team Project** (Monad Foundation): selected by the team on the platform.
+
+Not selected: Alchemy, Privy, Dynamic, Kuru, Perpl, Chainlink CRE, Nansen, Agora, Mera, Aurora and the model
+bounties. We do not claim bounties for integrations the product does not use.
 
 ## What was built during the window
 

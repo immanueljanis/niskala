@@ -36,7 +36,8 @@ export function SealedLanes({ view }: { view: RoundView }) {
               <div className="mono text-xs text-muted">
                 {commit ? (
                   <>
-                    tx <TxLink hash={commit.txHash} /> · {fmtTime(commit.committedAt)}
+                    tx <TxLink hash={commit.txHash} />
+                    {commit.committedAt > 0 && <> · {fmtTime(commit.committedAt)}</>}
                   </>
                 ) : sealed ? (
                   <span className="text-dim">onchain</span>

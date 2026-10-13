@@ -12,9 +12,10 @@
     "deploy:monad": "node scripts/deploy-monad.mjs",
     "setup:monad": "pnpm --filter @niskala/coordinator run setup",
     "lifecycle:monad": "pnpm --filter @niskala/coordinator run lifecycle",
-    "check": "pnpm zk:test && pnpm sdk:test && forge test --root contracts && pnpm -r --if-present typecheck && pnpm --filter @niskala/web build",
+    "check": "pnpm zk:test && pnpm sdk:test && pnpm coordinator:test && forge test --root contracts && pnpm -r --if-present typecheck && pnpm --filter @niskala/web build",
     "deploy:pools": "node scripts/deploy-pools.mjs",
     "sdk:test": "pnpm --filter @niskala/sdk test",
-    "sdk:gen": "pnpm --filter @niskala/sdk gen"
+    "sdk:gen": "pnpm --filter @niskala/sdk gen",
+    "coordinator:test": "pnpm --filter @niskala/coordinator test"
   }
 }

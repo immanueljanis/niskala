@@ -17,6 +17,10 @@ export const config = {
   priceFeedUrl: process.env.PRICE_FEED_URL ?? "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=",
   port: Number(env("PORT", "8787")),
   pollMs: Number(env("POLL_MS", "1500")),
+  /** Envio HyperSync token (https://envio.dev/app/api-tokens); empty disables the history sync. */
+  envioApiToken: process.env.ENVIO_API_TOKEN ?? "",
+  /** First block to scan for market events; defaults to just before the Monad testnet deployment. */
+  historyFromBlock: Number(process.env.HISTORY_FROM_BLOCK ?? (process.env.CHAIN_ID === "10143" ? "70500000" : "0")),
   explorerTxBase: env("EXPLORER_TX_BASE", "https://testnet.monadvision.com/tx/"),
   dataFile: resolve(here, `../data/rounds-${env("CHAIN_ID")}.json`),
   abiDir: resolve(here, "../../../packages/abi"),

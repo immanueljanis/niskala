@@ -5,7 +5,7 @@ import { readRfq, Status, web3, type ChainRfq } from "./chain.ts";
 import { config } from "./config.ts";
 import { makers } from "./makers.ts";
 import { poolBySlug, pools, registry, type Pool } from "./pools.ts";
-import { getRound, publicView, recordOpening } from "./rounds.ts";
+import { getRound, publicView, recordOpening, updateRound } from "./rounds.ts";
 
 const MAX_BODY = 4096;
 
@@ -51,7 +51,11 @@ function roster(chain: ChainRfq): MakerPublic[] {
 async function roundView(res: ServerResponse, pool: Pool, rfqId: bigint, proofOnly: boolean) {
   const chain = await readRfq(pool.market, rfqId);
   if (chain.status === 0) return json(res, 404, { error: "unknown rfq" });
-  const round = getRound(pool.slug, chain.rfqId);
+  let round = getRound(pool.slug, chain.rfqId);
+  if (round?.proof && round.proof.publicInputs.length === 0 && chain.status >= Status.PROVEN && chain.status !== Status.CANCELLED) {
+    const pi = (await pool.market.methods.publicInputs(rfqId, round.proof.winnerIndex, round.proof.winningPriceE6).call()) as string[];
+    round = updateRound(pool.slug, chain.rfqId, { proof: { ...round.proof, publicInputs: pi.map(String) } });
+  }
   const offchain = round ? publicView(round) : { pool: pool.slug, rfqId: chain.rfqId, phase: "open", commits: [], updatedAt: 0 };
   if (proofOnly) return json(res, 200, { pool: pool.slug, rfqId: chain.rfqId, proof: round?.proof ?? null, publicInputs: round?.proof?.publicInputs ?? null });
   const { proof, ...rest } = offchain as typeof offchain & { proof?: { proof: string } & Record<string, unknown> };

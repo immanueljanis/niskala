@@ -8,9 +8,11 @@
     "start": "node --env-file=.env --import tsx src/index.ts",
     "setup": "node --env-file=.env --import tsx scripts/setup.ts",
     "typecheck": "tsc --noEmit",
-    "lifecycle": "node --env-file=.env --import tsx scripts/lifecycle.ts"
+    "lifecycle": "node --env-file=.env --import tsx scripts/lifecycle.ts",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
+    "@envio-dev/hypersync-client": "1.4.1",
     "@niskala/sdk": "workspace:*",
     "@niskala/zk": "workspace:*",
     "web3": "^4.16.0"
