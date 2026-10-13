@@ -1,0 +1,43 @@
+1
+00:00:02,000 --> 00:00:11,500
+Niskala gives you the best price from five trading firms, and a proof that it really was the best. Eight markets, live on Monad.
+
+2
+00:00:12,000 --> 00:00:17,500
+I want a hundred SOL. One request goes to five trading firms.
+
+3
+00:00:18,000 --> 00:00:20,000
+One signature.
+
+4
+00:00:24,000 --> 00:00:27,800
+The firms quote in secret. All five sealed prices land in about two seconds.
+
+5
+00:00:28,000 --> 00:00:35,500
+Here's my price: 107.69 USDC per SOL, the best of the five. The other four prices stay secret.
+
+6
+00:00:36,000 --> 00:00:43,500
+And this proof, checked by the contract on Monad, shows no better price was hidden or skipped.
+
+7
+00:00:44,000 --> 00:00:47,000
+Now I execute. One more signature.
+
+8
+00:00:50,000 --> 00:00:53,800
+Done. The USDC goes to the winning firm, the SOL comes to me.
+
+9
+00:00:54,000 --> 00:01:03,000
+Everything is onchain. This is the contract verifying the proof.
+
+10
+00:01:04,000 --> 00:01:13,500
+And this is the settlement: ten thousand seven hundred sixty-nine USDC out, a hundred SOL in, in one transaction.
+
+11
+00:01:35,000 --> 00:01:40,000
+Best price. Proof it was the best. Niskala, live on Monad today.
