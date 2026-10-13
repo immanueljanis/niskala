@@ -22,9 +22,9 @@ COPY packages/sdk packages/sdk
 COPY packages/zk packages/zk
 COPY apps/coordinator apps/coordinator
 
-# Round records and quote openings live here; mount a volume on this path so redeploys keep them.
+# Round records and quote openings live here; a Railway volume is mounted on this path so redeploys keep them
+# (Railway rejects a Dockerfile VOLUME instruction, so the mount is configured on the service instead).
 RUN mkdir -p /app/apps/coordinator/data
-VOLUME ["/app/apps/coordinator/data"]
 
 WORKDIR /app/apps/coordinator
 ENV NODE_ENV=production

@@ -90,14 +90,23 @@ export function addWallet(privateKey: string) {
   return account;
 }
 
-/** One JSON-RPC batch of eth_call; returns raw hex results in order. */
-export async function batchCall(calls: Array<{ to: string; data: string }>): Promise<string[]> {
-  if (calls.length === 0) return [];
+/** Public endpoints reject larger JSON-RPC batches ("Batch size too large" from some egress IPs). */
+const BATCH_MAX = Number(process.env.RPC_BATCH_MAX ?? "10");
+
+async function batchChunk(calls: Array<{ to: string; data: string }>): Promise<string[]> {
   const batch = new web3.BatchRequest();
   const promises = calls.map((c, i) => batch.add({ jsonrpc: "2.0", id: i + 1, method: "eth_call", params: [{ to: c.to, data: c.data }, "latest"] } as any));
   for (const p of promises) p.catch(() => undefined);
   await batch.execute({ timeout: 8000 });
   return (await Promise.all(promises)).map(String);
+}
+
+/** eth_call for every entry, in order, sent as JSON-RPC batches of at most BATCH_MAX. */
+export async function batchCall(calls: Array<{ to: string; data: string }>): Promise<string[]> {
+  if (calls.length === 0) return [];
+  const chunks: Array<typeof calls> = [];
+  for (let i = 0; i < calls.length; i += BATCH_MAX) chunks.push(calls.slice(i, i + BATCH_MAX));
+  return (await Promise.all(chunks.map(batchChunk))).flat();
 }
 
 export const Status = { NONE: 0, OPEN: 1, COMMIT_CLOSED: 2, PROVEN: 3, SETTLED: 4, CANCELLED: 5 } as const;
