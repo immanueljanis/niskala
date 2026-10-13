@@ -75,22 +75,47 @@ const SLIDES: Slide[] = [
   {
     kicker: "The setup",
     body: (
+      <div className="flex w-full max-w-5xl flex-col items-center text-center">
+        <Headline>A fund buys $10M of ETH.</Headline>
+        <p className="mt-5 max-w-2xl text-lg text-muted">It asks a broker to collect prices from a few trading firms and pick the best one.</p>
+        <div className="mt-12 flex w-full flex-col items-stretch gap-4 md:flex-row md:items-center">
+          <div className="flex-1">
+            <Node label="Fund" sub="wants the best price" />
+          </div>
+          <Arrow />
+          <div className="flex-1">
+            <Node label="Broker" sub="collects prices, picks one" />
+          </div>
+          <Arrow />
+          <div className="flex-1">
+            <Node label="5 trading firms" sub="each sends a price" />
+          </div>
+        </div>
+        <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-tile px-4 py-2 text-sm text-muted">
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.6} /> The fund gets one number back: &ldquo;this was the best price.&rdquo;
+        </div>
+      </div>
+    ),
+  },
+  {
+    kicker: "The problem",
+    body: (
       <div className="grid w-full max-w-5xl items-center gap-10 md:grid-cols-[1fr_1fr]">
         <div>
-          <Headline>Big trades happen in private.</Headline>
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">You ask a few trading firms for a price and take the cheapest. You never see the others.</p>
+          <Headline>It can&apos;t check.</Headline>
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">In traditional finance, best execution is a legal duty. The proof is a report the broker writes about itself.</p>
         </div>
         <div className="card overflow-hidden">
           <div className="grid grid-cols-[1fr_auto] border-b border-hairline px-5 py-3 text-sm text-text">
-            <span>What the trader can check</span>
+            <span>What the fund can check</span>
             <span>Status</span>
           </div>
           {[
-            ["The price they got", true],
+            ["The price it got", true],
             ["That the trade settled", true],
-            ["The other quotes", false],
-            ["That the best quote won", false],
-            ["That no maker was favoured", false],
+            ["The other prices", false],
+            ["That the best price won", false],
+            ["That no firm was favoured", false],
           ].map(([label, ok]) => (
             <div key={String(label)} className="grid grid-cols-[1fr_auto] items-center border-b border-hairline px-5 py-3 text-sm text-muted last:border-0">
               <span>{label}</span>
@@ -102,24 +127,19 @@ const SLIDES: Slide[] = [
     ),
   },
   {
-    kicker: "The problem",
-    body: (
-      <div className="flex flex-col items-center text-center">
-        <Headline>Every private trade ends with four words.</Headline>
-        <div className="display mt-10 text-[clamp(3rem,8vw,6.5rem)] leading-none text-brand">&ldquo;Trust me. Best price.&rdquo;</div>
-        <p className="mt-8 max-w-xl text-lg text-muted">Someone picked the winner. You cannot check it.</p>
-      </div>
-    ),
-  },
-  {
-    kicker: "The trap",
+    kicker: "Why it is still broken",
     body: (
       <div className="w-full max-w-5xl text-center">
-        <Headline>Privacy, or proof. Pick one.</Headline>
+        <Headline>Put every price on a blockchain?</Headline>
         <div className="mt-10 grid gap-4 text-left md:grid-cols-2">
-          <Card icon={Eye} tone="bad" title="Prices on the blockchain" body="Everyone sees every price, so the firms stop giving their best one." />
-          <Card icon={EyeOff} tone="bad" title="Prices hidden" body="Someone in the middle picks the winner. You just have to believe them." />
+          <Card icon={Eye} tone="good" title="Everyone can check the winner" body="That part works." />
+          <Card icon={EyeOff} tone="bad" title="Every firm&apos;s strategy is public" body="Competitors copy it. Nobody wants to quote." />
         </div>
+        <p className="display mt-12 text-[clamp(1.6rem,3.2vw,2.5rem)] leading-tight text-text">
+          Today, the best price is something you&apos;re told.
+          <br />
+          <span className="text-brand">Not something you can check.</span>
+        </p>
       </div>
     ),
   },
@@ -127,19 +147,19 @@ const SLIDES: Slide[] = [
     kicker: "Meet Niskala",
     body: (
       <div className="flex w-full max-w-5xl flex-col items-center text-center">
-        <Headline>Both.</Headline>
-        <p className="mt-5 max-w-2xl text-lg text-muted">The best price from every maker, and a proof that it really was the best. Losing prices stay secret.</p>
+        <Headline>Niskala makes it something you can check.</Headline>
+        <p className="mt-5 max-w-2xl text-lg text-muted">Trading firms quote in secret. A proof, checked by the contract, shows the best price won. Losing prices are never shown to anyone, so firms are happy to quote.</p>
         <div className="mt-12 flex w-full flex-col items-stretch gap-4 md:flex-row md:items-center">
           <div className="flex-1">
-            <Node label="5 market makers" sub="sealed quotes, full size locked" />
+            <Node label="5 trading firms" sub="sealed prices, full size locked" />
           </div>
           <Arrow />
           <div className="flex-1">
-            <Node label="Niskala" sub="zero-knowledge proof, checked by the contract" strong />
+            <Node label="Niskala" sub="proof checked by the contract" strong />
           </div>
           <Arrow />
           <div className="flex-1">
-            <Node label="Trader" sub="best price + proof, one-transaction settle" />
+            <Node label="Fund" sub="best price + proof, settled in one transaction" />
           </div>
         </div>
       </div>
@@ -216,9 +236,9 @@ const SLIDES: Slide[] = [
           <div>
             <div className="text-sm text-dim">Today</div>
             <div className="mt-3 flex items-center gap-3">
-              <Node label="Makers" />
+              <Node label="Firms" />
               <Arrow />
-              <Node label="Router" sub="trust me" />
+              <Node label="Broker" sub="trust me" />
               <Arrow />
               <Node label="Trader" />
             </div>

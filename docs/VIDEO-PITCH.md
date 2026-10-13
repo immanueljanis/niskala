@@ -22,24 +22,25 @@ Record the browser full screen with your voice over it, or picture-in-picture wi
 
 ### 2 · The setup (0:10–0:22)
 
-> "If you want to buy a lot of crypto at once, you don't use a normal exchange. You ask a few trading firms for a
-> price and take the cheapest one."
+> "When a fund buys ten million dollars of ETH, it doesn't use an exchange. It asks a broker to collect prices from a
+> few trading firms and pick the best one. Then it gets one number back. This was the best price."
 
-### 3 · The problem (0:22–0:30)
+### 3 · The problem (0:22–0:35)
 
-> "But you never see the other prices. You just hear: trust me, best price."
+> "It can't see the other prices. It can't check. In traditional finance, best execution is even a legal duty, and the
+> proof is a report the broker writes about itself."
 
-### 4 · The trap (0:30–0:50)
+### 4 · Why it is still broken (0:35–0:50)
 
-> "Here's the problem. If those prices go on the blockchain, everyone sees them, and the firms stop giving their best
-> price. If the prices stay hidden, someone in the middle picks the winner, and you just have to believe them.
+> "Putting every price on a blockchain would fix that. But then every firm's strategy is public, and nobody wants to
+> quote.
 >
-> So today you either give up privacy, or you give up proof."
+> So today, the best price is something you're told. Not something you can check."
 
 ### 5 · Meet Niskala (0:50–1:05)
 
-> "Niskala gives you both. The best price from every maker, and a proof that it really was the best. The losing
-> prices stay secret."
+> "Niskala makes it something you can check. Trading firms quote in secret. A proof, checked by the contract, shows the
+> best price won. And the firms join, because their losing prices are never shown to anyone."
 
 ### 6 · How it works (1:05–1:20)
 
@@ -61,6 +62,9 @@ Record the browser full screen with your voice over it, or picture-in-picture wi
 > "We think every price with a secret behind it deserves a proof. Niskala. Private quotes, provably best execution."
 
 ## Delivery notes
+
+- If a judge asks "isn't your coordinator the new middleman?": "Our coordinator can see prices, but it can't lie about
+  the winner. The contract checks that." Full privacy from the coordinator is the roadmap.
 
 - One idea per slide. If you run long, shorten slide 6 first.
 - Say "the contract checks it" at least once; it is what makes this different from every private RFQ.
