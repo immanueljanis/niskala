@@ -1,0 +1,6 @@
+{
+  "name": "@niskala/pools",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./pools.json"
+}

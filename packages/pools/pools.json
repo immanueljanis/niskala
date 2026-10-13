@@ -1,0 +1,232 @@
+{
+  "10143": {
+    "verifier": "0x22Aaeff3Df06535AeFD92D5475628D2eF61c4FaD",
+    "makers": [
+      "0x3cDe2bfeF87f8eFc65FC381219b77B9F4BFc72f4",
+      "0x2A3780c5A61975117BeEF7BDa931ffB0d795cD9D",
+      "0x981E3471e32c3dec3E847dcf43364Fa972D34FE9",
+      "0xa084b90fbBBD2045a6d8E6EAcb057e6b40A771Db",
+      "0xce516291193Ca15d3C161e987A04B9F67eddEAE1"
+    ],
+    "quote": {
+      "symbol": "USDC",
+      "name": "Niskala Mock USDC",
+      "decimals": 6,
+      "address": "0x9a0653C6a22318dE8e89e696422eFD9fE7d7dF1D",
+      "logo": "/tokens/usdc.png"
+    },
+    "pools": [
+      {
+        "slug": "weth-usdc",
+        "base": {
+          "symbol": "WETH",
+          "name": "Wrapped Ether",
+          "decimals": 18,
+          "address": "0x91F2388e78906ef91fB7E673A45d21852027B835",
+          "logo": "/tokens/eth.png"
+        },
+        "market": "0xCB6B05059d5Fe13866612Ff1c391Aa812364B609",
+        "coingeckoId": "ethereum",
+        "referencePriceE6": "2500000000",
+        "defaultSize": "10",
+        "maxSize": "100",
+        "makerDeposit": "500",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "Majors",
+        "description": "The original Niskala market. Round #1 settled here on 13 Oct 2026."
+      },
+      {
+        "slug": "wbtc-usdc",
+        "base": {
+          "symbol": "WBTC",
+          "name": "Wrapped Bitcoin",
+          "decimals": 18,
+          "address": "0x12e36137B87431e23429B112Cbd51e7a680196DD",
+          "logo": "/tokens/wbtc.png"
+        },
+        "market": "0xB29AF2bD7e086B0347434B5888eB42bF7BA83AeC",
+        "coingeckoId": "bitcoin",
+        "referencePriceE6": "83000000000",
+        "defaultSize": "0.5",
+        "maxSize": "5",
+        "makerDeposit": "25",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "Majors",
+        "description": "Large-ticket BTC blocks where a leaked losing quote moves the market the most."
+      },
+      {
+        "slug": "wmon-usdc",
+        "base": {
+          "symbol": "WMON",
+          "name": "Wrapped Monad",
+          "decimals": 18,
+          "address": "0xE29584674c46f492663424c5848aAA5C550C9116",
+          "logo": "/tokens/mon.png"
+        },
+        "market": "0xAa6942Fdf7C2658a662fA48cBb1aD10d5ca9FBD2",
+        "coingeckoId": "monad",
+        "referencePriceE6": "25000",
+        "defaultSize": "10000",
+        "maxSize": "100000",
+        "makerDeposit": "500000",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "Monad",
+        "description": "The native asset of the venue's own chain, quoted in six-decimal USDC."
+      },
+      {
+        "slug": "sol-usdc",
+        "base": {
+          "symbol": "SOL",
+          "name": "Solana",
+          "decimals": 18,
+          "address": "0x0b7eA6619842625BD56e8Bcf50cEAefF6d935F76",
+          "logo": "/tokens/sol.png"
+        },
+        "market": "0x49294a487b54Ebe500e1696F535F31267f6e290e",
+        "coingeckoId": "solana",
+        "referencePriceE6": "107000000",
+        "defaultSize": "100",
+        "maxSize": "1000",
+        "makerDeposit": "5000",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "Majors",
+        "description": "Cross-ecosystem flow: makers price SOL exposure from Monad without a public book."
+      },
+      {
+        "slug": "link-usdc",
+        "base": {
+          "symbol": "LINK",
+          "name": "Chainlink",
+          "decimals": 18,
+          "address": "0x3eef804e7E7f55E972A1E4D8c4ccFC5779db6f23",
+          "logo": "/tokens/link.png"
+        },
+        "market": "0x1c65C0Bf82A25e037e6A04739fB6c3F5A161Fdba",
+        "coingeckoId": "chainlink",
+        "referencePriceE6": "13000000",
+        "defaultSize": "500",
+        "maxSize": "5000",
+        "makerDeposit": "25000",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "DeFi",
+        "description": "Mid-cap DeFi asset with wider maker spreads; the proof keeps those spreads private."
+      },
+      {
+        "slug": "uni-usdc",
+        "base": {
+          "symbol": "UNI",
+          "name": "Uniswap",
+          "decimals": 18,
+          "address": "0xf9E94B9CD4eD5Ac8F398cCCB4dCDB07F66A0D913",
+          "logo": "/tokens/uni.png"
+        },
+        "market": "0x2710E1f1954fba536E75B5C9d28A9bc809FF7290",
+        "coingeckoId": "uniswap",
+        "referencePriceE6": "7300000",
+        "defaultSize": "1000",
+        "maxSize": "10000",
+        "makerDeposit": "50000",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "DeFi",
+        "description": "Governance-token blocks that would otherwise be routed through a public AMM."
+      },
+      {
+        "slug": "aave-usdc",
+        "base": {
+          "symbol": "AAVE",
+          "name": "Aave",
+          "decimals": 18,
+          "address": "0xC1D4B77612310a0879EF2459B7231604C546FAB0",
+          "logo": "/tokens/aave.png"
+        },
+        "market": "0xBd4C2923A62e039C735aF64219ec81994027A75c",
+        "coingeckoId": "aave",
+        "referencePriceE6": "159000000",
+        "defaultSize": "50",
+        "maxSize": "500",
+        "makerDeposit": "2500",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "DeFi",
+        "description": "Thinner liquidity, higher price impact: the case where sealed competition matters most."
+      },
+      {
+        "slug": "arb-usdc",
+        "base": {
+          "symbol": "ARB",
+          "name": "Arbitrum",
+          "decimals": 18,
+          "address": "0x8739f97b5e575329dEEB3294675c6adAc72B8d60",
+          "logo": "/tokens/arb.png"
+        },
+        "market": "0x7AED92298E3294114B2D4497e5Dcb68eCBc329C6",
+        "coingeckoId": "arbitrum",
+        "referencePriceE6": "186000",
+        "defaultSize": "5000",
+        "maxSize": "50000",
+        "makerDeposit": "250000",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "L2",
+        "description": "Low-unit-price asset: shows the integer price model holding at six decimals."
+      }
+    ],
+    "legacy": {
+      "note": "v1 deployment (3 fixed maker slots), kept for the round #1 receipt",
+      "verifier": "0x4978Ca3B939D93e0611Bc317aD0e923D0FEA6354",
+      "markets": {
+        "weth-usdc": "0x054694A70B61AA6493A14ea729f7044986A30F9D",
+        "wbtc-usdc": "0x0de722eA0730cE4EC6f638CBE9Cec7EB1C6306cB",
+        "wmon-usdc": "0xf7EBAd8ec4CE24f97873b4aD2c3608f597263433",
+        "sol-usdc": "0xAe143B039112b569d01CB069dA1B0C9EA2bbb937",
+        "link-usdc": "0x8863Fa11a8Bc39947A3a9a32aE7552519707cBd7",
+        "uni-usdc": "0x66Af5dC905940A186D453b578051B6EBbd7f0BC5",
+        "aave-usdc": "0x0e5F88a652A08511824e81E46D4641BA4e565F9f",
+        "arb-usdc": "0xa309b02D62E18Bc3935EFe0825d80017D52F4ae1"
+      }
+    }
+  },
+  "31337": {
+    "verifier": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "makers": [
+      "0x3cDe2bfeF87f8eFc65FC381219b77B9F4BFc72f4",
+      "0x2A3780c5A61975117BeEF7BDa931ffB0d795cD9D",
+      "0x981E3471e32c3dec3E847dcf43364Fa972D34FE9"
+    ],
+    "quote": {
+      "symbol": "USDC",
+      "name": "Niskala Mock USDC",
+      "decimals": 6,
+      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "logo": "/tokens/usdc.png"
+    },
+    "pools": [
+      {
+        "slug": "weth-usdc",
+        "base": {
+          "symbol": "WETH",
+          "name": "Wrapped Ether",
+          "decimals": 18,
+          "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "logo": "/tokens/eth.png"
+        },
+        "market": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+        "coingeckoId": "ethereum",
+        "referencePriceE6": "2500000000",
+        "defaultSize": "10",
+        "maxSize": "100",
+        "makerDeposit": "500",
+        "commitWindowSec": 120,
+        "settleWindowSec": 900,
+        "tier": "Majors",
+        "description": "Local anvil market."
+      }
+    ]
+  }
+}
