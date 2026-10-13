@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { config } from "./config.ts";
 import { poolBySlug, registry } from "./pools.ts";
@@ -66,16 +66,37 @@ function marketOf(pool: string): string {
 
 const key = (market: string, rfqId: string) => `${market.toLowerCase()}:${rfqId}`;
 
-export function loadRounds() {
-  if (!existsSync(config.dataFile)) return;
-  const raw = JSON.parse(readFileSync(config.dataFile, "utf8")) as Array<Round & { market?: string }>;
+function readRecords(file: string): Round[] {
+  if (!existsSync(file)) return [];
+  const raw = JSON.parse(readFileSync(file, "utf8")) as Array<Round & { market?: string }>;
   const legacy = (registry as { legacy?: { markets?: Record<string, string> } } | undefined)?.legacy?.markets ?? {};
-  for (const r of raw) {
-    if (!r.pool) continue;
+  return raw.flatMap((r) => {
     const market = (r.market ?? legacy[r.pool] ?? "").toLowerCase();
-    if (!market) continue;
-    rounds.set(key(market, r.rfqId), { ...r, market });
+    return r.pool && market ? [{ ...r, market }] : [];
+  });
+}
+
+/**
+ * Loads the data file, then merges a one-off seed file (same layout, placed next to it as `seed-<chain>.json`)
+ * for rounds the data file knows nothing about, so history can be moved between hosts without stopping the
+ * writer. The seed is renamed after import so it is applied once.
+ */
+export function loadRounds() {
+  for (const r of readRecords(config.dataFile)) rounds.set(key(r.market, r.rfqId), r);
+  const seedFile = config.dataFile.replace(/rounds-/, "seed-");
+  const seed = readRecords(seedFile);
+  if (seed.length === 0) return;
+  let imported = 0;
+  for (const r of seed) {
+    const k = key(r.market, r.rfqId);
+    const current = rounds.get(k);
+    if (current && current.commits.length > 0) continue;
+    rounds.set(k, r);
+    imported++;
   }
+  renameSync(seedFile, `${seedFile}.imported`);
+  console.log(`rounds: imported ${imported} of ${seed.length} seed records from ${seedFile}`);
+  scheduleSave();
 }
 
 let saveTimer: NodeJS.Timeout | undefined;
