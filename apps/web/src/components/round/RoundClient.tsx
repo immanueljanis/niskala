@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PoolLogo } from "@/components/PoolLogo";
 import { Notice, Pill, type Tone, AddressLink } from "@/components/ui";
 import { fmtCountdown, fmtUnits, statusLabel } from "@/lib/format";
@@ -27,6 +27,12 @@ function headline(status: number, phase: string, commitmentCount: number) {
 export function RoundClient({ poolSlug, rfqId }: { poolSlug: string; rfqId: string }) {
   const { view, coordinatorOffline, error, now } = useRound(poolSlug, rfqId);
   const [settleTx, setSettleTx] = useState<string | null>(null);
+  const chainStatus = view?.chain.status;
+
+  /** The execute panel and receipt sit under the header; bring them into view when the round reaches them. */
+  useEffect(() => {
+    if (chainStatus === 3 || chainStatus === 4) window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [chainStatus]);
 
   if (error && !view) {
     return (
@@ -85,11 +91,11 @@ export function RoundClient({ poolSlug, rfqId }: { poolSlug: string; rfqId: stri
       {offchain.phase === "error" && offchain.error && <Notice tone="error">{offchain.error}</Notice>}
       {status === 5 && <Notice tone="error">This round was cancelled. Locked maker capital has been released.</Notice>}
 
+      {status === 3 && <ExecutePanel view={view} now={now} onSettled={setSettleTx} />}
+      {status === 4 && <Receipt view={view} settleTx={settleTx} />}
       <PhaseStrip view={view} now={now} />
       <SealedLanes view={view} />
       {status >= 3 && status !== 5 && <ProofResult view={view} />}
-      {status === 3 && <ExecutePanel view={view} now={now} onSettled={setSettleTx} />}
-      {status === 4 && <Receipt view={view} settleTx={settleTx} />}
       <ProofInspector view={view} />
     </div>
   );
