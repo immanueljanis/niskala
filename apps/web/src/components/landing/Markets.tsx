@@ -47,7 +47,6 @@ export function Markets() {
           );
         })}
       </div>
-      <p className="mt-4 text-xs text-dim">Every market is its own RfqMarket contract on Monad testnet with the same five makers and the same verifier. Mock tokens; prices reference live market data.</p>
     </div>
   );
 }

@@ -15,11 +15,11 @@ interface Step {
 }
 
 const STEPS: Step[] = [
-  { key: "request", icon: FileText, actor: "Trader", title: "Request", body: "Open a fixed-size RFQ: buy 10 WETH for USDC. Pair, size and direction go onchain. Nothing else does.", onchain: "createRfq → RfqCreated #1" },
-  { key: "seal", icon: Users, actor: "Up to five makers", title: "Seal", body: "Each maker prices privately and sends a Poseidon2 commitment from its own wallet. The commitment locks the full size, so every sealed quote can fill.", onchain: "commit(#1, 0x07c8…) ×3", privateNote: "price and salt stay with the maker and the prover" },
-  { key: "close", icon: Lock, actor: "Contract", title: "Close", body: "At five commitments the window closes, or at the deadline with at least three. The set is final: nothing can be added, swapped or withdrawn.", onchain: "CommitPhaseClosed(#1, count)" },
-  { key: "prove", icon: ShieldCheck, actor: "Coordinator → verifier", title: "Prove and verify", body: "A proof shows the winner is the lowest valid quote across every committed quote. The contract rebuilds the public inputs, including how many quotes there were, from its own storage and verifies it.", onchain: "submitProof → BestExecutionProven", privateNote: "the two losing prices stay sealed" },
-  { key: "settle", icon: ArrowLeftRight, actor: "Trader", title: "Settle", body: "Execute at the proven price: USDC to the winning maker, WETH to the trader, losing collateral released. One transaction.", onchain: "execute(#1) → RfqSettled" },
+  { key: "request", icon: FileText, actor: "Trader", title: "Request", body: "Open a fixed-size RFQ. Pair, size and direction go onchain. Nothing else does.", onchain: "createRfq → RfqCreated #1" },
+  { key: "seal", icon: Users, actor: "Up to five makers", title: "Seal", body: "Each maker sends a Poseidon2 commitment from its own wallet. The commitment locks the full size, so every sealed quote can fill.", onchain: "commit(#1, 0x07c8…) ×3", privateNote: "price and salt stay with the maker and the prover" },
+  { key: "close", icon: Lock, actor: "Contract", title: "Close", body: "The window closes at five commitments, or at the deadline with at least three. The set is final.", onchain: "CommitPhaseClosed(#1, count)" },
+  { key: "prove", icon: ShieldCheck, actor: "Coordinator → verifier", title: "Prove and verify", body: "A proof shows the winner is the lowest valid quote in the set. The contract rebuilds the public inputs from its own storage and verifies it.", onchain: "submitProof → BestExecutionProven", privateNote: "the two losing prices stay sealed" },
+  { key: "settle", icon: ArrowLeftRight, actor: "Trader", title: "Settle", body: "Execute at the proven price. USDC to the winner, the asset to the trader, losers unlocked. One transaction.", onchain: "execute(#1) → RfqSettled" },
 ];
 
 const EASE = [0.16, 1, 0.3, 1] as const;

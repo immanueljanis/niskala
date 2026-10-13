@@ -136,7 +136,7 @@ export default function TradePage() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4 animate-fade-up">
         <div>
           <h1 className="display text-4xl md:text-5xl">Request private quotes</h1>
-          <p className="mt-3 max-w-md text-sm text-muted">Pick a market. Three sealed makers compete; the proof picks the price.</p>
+          <p className="mt-3 max-w-md text-sm text-muted">Pick a market. Sealed makers compete; the proof picks the price.</p>
         </div>
         <div className="flex items-center gap-3 text-xs text-dim">
           <span>{NETWORK.name}</span>
@@ -180,7 +180,7 @@ export default function TradePage() {
               <div>
                 <div className="text-xs text-dim">Amount ({pool.base.symbol})</div>
                 <input className="input mono mt-1.5 text-base" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} />
-                <div className="mt-1.5 text-xs text-dim">Every maker fills the full amount. Up to {pool.maxSize} {pool.base.symbol} per round.</div>
+                <div className="mt-1.5 text-xs text-dim">Up to {pool.maxSize} {pool.base.symbol} per round.</div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="tile px-4 py-3">
@@ -254,7 +254,7 @@ export default function TradePage() {
           <div className="card">
             <div className="flex items-center justify-between px-6 py-5">
               <div className="text-sm text-text">Recent rounds · {pool.base.symbol} / USDC</div>
-              <span className="text-xs text-dim">refreshes every 4 s</span>
+
             </div>
             <div className="px-2 pb-2">
               {recent.length === 0 && <div className="px-4 py-10 text-center text-sm text-dim">No rounds in this market yet.</div>}
@@ -325,7 +325,6 @@ export default function TradePage() {
                 <span className="text-xs text-verified">ready</span>
               </div>
             ))}
-            <p className="text-xs text-dim">The same five makers quote every market. Strategies and inventory stay with each maker.</p>
           </div>
         </div>
       </div>

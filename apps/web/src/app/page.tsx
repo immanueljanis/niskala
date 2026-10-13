@@ -5,7 +5,7 @@ import { Compare } from "@/components/landing/Compare";
 import { ContractPill } from "@/components/landing/ContractPill";
 import { Faq } from "@/components/landing/Faq";
 import { FlowStepper } from "@/components/landing/FlowStepper";
-import { HeroField } from "@/components/landing/HeroField";
+import { HeroScene } from "@/components/landing/HeroScene";
 import { Markets } from "@/components/landing/Markets";
 import { Replay } from "@/components/landing/Replay";
 import { Reveal } from "@/components/landing/Reveal";
@@ -22,7 +22,7 @@ export default function Landing() {
     <div>
       <section className="relative">
         <div className="absolute inset-x-0 top-0 h-[78vh] min-h-[560px]">
-          <HeroField />
+          <HeroScene />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-bg to-transparent" />
         </div>
         <div className="relative mx-auto flex max-w-7xl flex-col items-center px-5 pt-28 text-center md:pt-36">
@@ -34,7 +34,7 @@ export default function Landing() {
             </h1>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted">Up to five market makers quote in secret. A proof verified on Monad shows the best valid quote won. Only that price is revealed, then the trade settles.</p>
+            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted">Makers quote in secret. A proof verified on Monad shows the best quote won. Only that price is revealed.</p>
           </Reveal>
           <Reveal delay={0.18}>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -60,7 +60,7 @@ export default function Landing() {
                 <div className="label">What happens in a round</div>
                 <h2 className="display mt-3 text-3xl md:text-[2.5rem]">Sealed competition, verified result.</h2>
               </div>
-              <p className="self-end text-[15px] leading-relaxed text-muted">A trader opens a fixed-size RFQ on Monad. Up to five makers commit hidden quotes. One proof shows which valid quote is best, and the contract settles at that price.</p>
+              <p className="self-end text-[15px] leading-relaxed text-muted">A trader opens an RFQ. Up to five makers commit hidden quotes. One proof picks the best, and the contract settles at that price.</p>
               <div className="grid gap-3 sm:grid-cols-3 md:col-span-2">
                 {MOVES.map((m) => (
                   <a key={m.n} href={m.href} className="tile flex items-center justify-between px-5 py-4 text-sm transition-colors hover:bg-[#e2e8e5]">
@@ -87,7 +87,7 @@ export default function Landing() {
         <Reveal>
           <div className="flex flex-wrap items-end justify-between gap-6">
             <h2 className="display text-3xl md:text-[2.5rem]">Eight markets, one proof.</h2>
-            <p className="max-w-sm text-sm text-muted">Each market is its own contract on Monad with the same five makers and the same verifier.</p>
+
           </div>
         </Reveal>
         <div className="mt-8">
@@ -99,7 +99,7 @@ export default function Landing() {
 
       <section className="mx-auto max-w-7xl px-5 pt-24 md:pt-32">
         <Reveal>
-          <h2 className="display max-w-2xl text-3xl md:text-[2.5rem]">The makers were always private. The router was always trusted.</h2>
+          <h2 className="display max-w-2xl text-3xl md:text-[2.5rem]">Makers were always private. Routers were always trusted.</h2>
         </Reveal>
         <div className="mt-8">
           <Reveal delay={0.1}>
@@ -112,7 +112,7 @@ export default function Landing() {
         <Reveal>
           <div className="flex flex-wrap items-end justify-between gap-6">
             <h2 className="display text-3xl md:text-[2.5rem]">One round, five moves.</h2>
-            <p className="max-w-sm text-sm text-muted">Hover to pause, click a move to jump.</p>
+
           </div>
         </Reveal>
         <div className="mt-8">
@@ -124,7 +124,7 @@ export default function Landing() {
 
       <section id="replay" className="mx-auto max-w-7xl scroll-mt-20 px-5 pt-24 md:pt-32">
         <Reveal>
-          <h2 className="display max-w-2xl text-3xl md:text-[2.5rem]">Not a mock. Round #2 ran on Monad with five makers.</h2>
+          <h2 className="display max-w-2xl text-3xl md:text-[2.5rem]">Not a mock. This round ran on Monad.</h2>
         </Reveal>
         <div className="mt-8">
           <Reveal delay={0.1}>
@@ -158,7 +158,7 @@ export default function Landing() {
       <section className="mx-auto max-w-7xl px-5 pt-24 md:pt-32">
         <Reveal>
           <div className="rounded-2xl bg-brand px-8 py-14 text-center text-white md:py-20">
-            <h2 className="display mx-auto max-w-2xl text-3xl md:text-5xl">Buy against up to five sealed makers. Settle on the proven price.</h2>
+            <h2 className="display mx-auto max-w-2xl text-3xl md:text-5xl">Sealed quotes. Proven price.</h2>
             <Link href="/trade" className="btn mt-8 bg-white text-text hover:bg-bg">
               Request private quotes <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
             </Link>

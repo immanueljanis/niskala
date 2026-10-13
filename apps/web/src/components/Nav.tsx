@@ -24,7 +24,6 @@ export function Nav() {
       <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5">
         <Link href="/" className="flex items-baseline gap-2 justify-self-start">
           <span className="display text-[22px] leading-none">Niskala</span>
-          <span className="hidden text-xs text-dim sm:inline">Private RFQ</span>
         </Link>
         <nav className="hidden items-center gap-7 md:flex">
           {links.map((l) => (

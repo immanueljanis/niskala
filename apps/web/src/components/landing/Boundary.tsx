@@ -33,7 +33,7 @@ export function Boundary() {
             </li>
           ))}
         </ul>
-        <p className="mt-6 rounded-lg bg-surface p-4 text-xs leading-relaxed text-muted">The coordinator that runs the demo makers and builds the proof does see the openings. Removing that trust with MPC, FHE or TEE proving is the roadmap, not a claim.</p>
+        <p className="mt-6 rounded-lg bg-surface p-4 text-xs leading-relaxed text-muted">The coordinator that builds the proof sees the openings. Removing that trust (MPC, FHE, TEE) is roadmap, not a claim.</p>
       </div>
     </div>
   );

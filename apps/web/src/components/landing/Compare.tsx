@@ -27,7 +27,7 @@ export function Compare() {
           <Arrow dashed />
           <Node icon={Users} label="Makers quote privately" />
         </div>
-        <p className="mt-5 max-w-md text-sm leading-relaxed text-muted">The trader cannot check the router&apos;s claim that the selected quote was the best valid one it saw.</p>
+        <p className="mt-5 max-w-md text-sm leading-relaxed text-muted">The trader takes the router&apos;s word for it.</p>
       </div>
       <div className="rounded-xl bg-brand p-7 text-white">
         <div className="text-xs text-white/60">Niskala</div>
@@ -39,7 +39,7 @@ export function Compare() {
           <Arrow />
           <Node icon={ShieldCheck} label="Proof checked by the contract" tone="verified" />
         </div>
-        <p className="mt-5 max-w-md text-sm leading-relaxed text-white/75">The commitment set is public, the proof is verified by code, settlement is atomic. Evidence instead of a promise, and the losing prices stay sealed.</p>
+        <p className="mt-5 max-w-md text-sm leading-relaxed text-white/75">The set is public, the proof is checked by code, settlement is atomic. Losing prices stay sealed.</p>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ export function Footer() {
         <div className="space-y-2">
           <div className="display text-2xl text-text">Niskala</div>
           <div>Private quotes. Provably best execution.</div>
-          <div className="text-xs text-dim">Monad Metropolis · Track 01, Onchain Finance &amp; Trading</div>
+          <div className="text-xs text-dim">Monad Metropolis · Track 01</div>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 md:gap-14">
           <div className="space-y-1.5 text-xs">

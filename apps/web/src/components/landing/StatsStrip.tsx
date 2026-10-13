@@ -26,10 +26,10 @@ export function StatsStrip() {
   const settled = pools.reduce((acc, p) => acc + (p.stats?.settled ?? 0), 0);
 
   const cells = [
-    { label: "markets on Monad testnet", value: <Count value={pools.length} />, sub: "one contract each, one shared verifier" },
+    { label: "markets on Monad testnet", value: <Count value={pools.length} />, sub: "" },
     { label: "rounds so far", value: live ? <Count value={rounds} /> : "—", sub: live ? `${settled} settled` : "coordinator offline" },
     { label: "time to prove", value: <Count value={0.6} decimals={1} suffix=" s" />, sub: "7,232-byte UltraHonk proof" },
-    { label: "verification gas", value: <Count value={5.8} decimals={1} suffix=" M" />, sub: "one contract call" },
+    { label: "verification gas", value: <Count value={5.8} decimals={1} suffix=" M" />, sub: "" },
   ];
 
   return (
@@ -38,7 +38,7 @@ export function StatsStrip() {
         <div key={c.label} className="tile px-6 py-6">
           <div className="display text-4xl text-text">{c.value}</div>
           <div className="mt-2 text-sm text-muted">{c.label}</div>
-          <div className="mt-1 text-xs text-dim">{c.sub}</div>
+          {c.sub && <div className="mt-1 text-xs text-dim">{c.sub}</div>}
         </div>
       ))}
     </div>

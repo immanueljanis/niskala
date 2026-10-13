@@ -65,7 +65,7 @@ export function ExecutePanel({ view, now, onSettled }: { view: RoundView; now: n
           <div className="display mt-2 text-3xl">
             {cost ? fmtUnits(cost, 6, 2) : "—"} USDC <span className="text-white/50">for</span> {fmtUnits(chain.amountOut, pool.base.decimals, 4)} {sym}
           </div>
-          <div className="mt-2 text-sm text-white/70">Atomic: USDC to the winning maker, {sym} to you, losing collateral released.</div>
+          <div className="mt-2 text-sm text-white/70">One transaction: USDC to the winner, {sym} to you.</div>
         </div>
         <div className="mono text-xs text-white/60">settle by {fmtCountdown(chain.settleDeadline, now)}</div>
       </div>

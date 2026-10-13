@@ -49,7 +49,7 @@ export function SealedLanes({ view }: { view: RoundView }) {
           );
         })}
       </div>
-      {proven && <div className="px-6 pb-5 text-xs text-dim">Losing quotes remain sealed. They were never sent to the trader or the chain.</div>}
+      {proven && <div className="px-6 pb-5 text-xs text-dim">Losing quotes stay sealed.</div>}
     </div>
   );
 }

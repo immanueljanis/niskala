@@ -38,7 +38,7 @@ export function ProofInspector({ view }: { view: RoundView }) {
     <div className="card">
       <div className="flex items-center justify-between px-6 py-5">
         <div className="text-sm text-text">Proof inspector</div>
-        <span className="text-xs text-dim">what the chain knows vs. what stays private</span>
+
       </div>
       <div className="grid gap-3 px-3 pb-3 md:grid-cols-2">
         <div className="tile p-4">

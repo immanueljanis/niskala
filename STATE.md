@@ -37,6 +37,11 @@ Full redesign of every surface after the TrustFlow reference: light palette with
 no borders, tonal tiles, white overlap card, same canvas hero in light tones. See `DESIGN.md` and `docs/DESIGN-REVIEW.md` (v3).
 Screenshots `docs/screenshots/v3-*.png`. Typecheck, build and verifier pass; no console errors; no overflow at 390 px.
 
+## Design v4 (2026-10-13, copy trim + three.js hero)
+Unnecessary copy removed across landing, terminal and round pages (one sentence per idea, no repeated facts).
+Hero replaced by `HeroScene.tsx`: three.js line terrain, simplex noise in the vertex shader, pine proof front every 11 s,
+pointer-eased camera, reduced-motion static frame, pauses off screen. Screenshots `docs/screenshots/v7-hero*.png`.
+
 ## Landing v2 (2026-10-13, after first feedback)
 Generative canvas hero, live stats strip, routing comparison, five-move interactive flow stepper, round #1 ledger with
 real Monad transactions, public/private boundary, judge FAQ, wordmark close. `motion` + `lucide-react` added. Reverse-engineering

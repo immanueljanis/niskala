@@ -69,7 +69,7 @@ export function Replay() {
     <div className="card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
         <div className="text-sm text-muted">
-          WETH / USDC round <span className="text-text">#{REPLAY_RFQ}</span> on Monad testnet, five makers. Every row is a transaction you can open.
+          WETH / USDC round <span className="text-text">#{REPLAY_RFQ}</span>, five makers. Every row is a transaction.
         </div>
         <Link href={`/rfq/${REPLAY_POOL}/${REPLAY_RFQ}`} className="inline-flex items-center gap-1 text-sm text-accent underline-offset-4 hover:underline">
           Full receipt <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
