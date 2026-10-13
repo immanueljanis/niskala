@@ -11,6 +11,7 @@ const links = [
   { href: "/#flow", label: "How it works" },
   { href: "/#replay", label: "Live round" },
   { href: "/#privacy", label: "Privacy" },
+  { href: "/#sdk", label: "SDK" },
   { href: "/#faq", label: "FAQ" },
 ];
 

@@ -38,6 +38,11 @@ export function Footer() {
               </Link>
             </div>
             <div>
+              <a href="https://github.com/immanueljanis/niskala/tree/main/packages/sdk" target="_blank" rel="noreferrer" className="hover:text-text">
+                SDK guide
+              </a>
+            </div>
+            <div>
               <a href={EXPLORER_URL} target="_blank" rel="noreferrer" className="hover:text-text">
                 MonadVision explorer
               </a>

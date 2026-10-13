@@ -8,7 +8,8 @@
 | Maker copies another maker's commitment | Maker address is part of the hash preimage and a public input | — |
 | Proof replayed on another RFQ / chain / market | Public inputs rebuilt from storage; `domain = chainId<<160 \| market`; `rfqId` in preimage | — |
 | Prover fabricates a winner | Honk verifier rejects (tested onchain: wrong winner, wrong price, tampered bytes, altered commitment) | — |
-| Maker commits but withholds opening | Not possible with simulated makers; a real maker could stall a round until `settleDeadline`, then `expire` unlocks everyone | V1: delivery receipts + bond + slashing / exclusion |
+| Maker commits but withholds opening | Demo makers always deliver; an external SDK maker could stall a round until `settleDeadline`, then `expire` unlocks everyone | V1: delivery receipts + bond + slashing / exclusion |
+| Forged or mismatched opening from an external maker | Opening must be signed by the committed maker (EIP-191 over a canonical message with chainId, market, rfqId) and must hash to that maker's onchain commitment; otherwise rejected before it reaches the witness | — |
 | Trader sees losing quotes | Frontend, API and chain never carry them; API strips openings before serialization | — |
 | Coordinator sees losing quotes | **Accepted for the MVP** and stated in the UI/README | MPC / FHE / TEE proving, distributed witness |
 | Front-running the winner | Commitments carry no price; winning price appears only in `submitProof` after the commit window closed | — |
@@ -22,4 +23,4 @@
 - Not "nobody sees losing quotes".
 - Not "trustless confidentiality against the prover".
 - Not "fully private market making".
-- Not arbitrary-size completeness: the circuit is fixed at three slots and proves over exactly those three commitments.
+- Not arbitrary-size completeness: the circuit is fixed at five slots with a public `count` and proves over exactly the committed set (three to five commitments).

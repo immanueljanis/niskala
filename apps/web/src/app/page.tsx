@@ -8,6 +8,7 @@ import { HeroScene } from "@/components/landing/HeroScene";
 import { Markets } from "@/components/landing/Markets";
 import { Replay } from "@/components/landing/Replay";
 import { Reveal } from "@/components/landing/Reveal";
+import { Sdk } from "@/components/landing/Sdk";
 import { StatsStrip } from "@/components/landing/StatsStrip";
 import { POOLS } from "@/lib/pools";
 
@@ -126,6 +127,17 @@ export default function Landing() {
         <div className="mt-8">
           <Reveal delay={0.1}>
             <Boundary />
+          </Reveal>
+        </div>
+      </section>
+
+      <section id="sdk" className="mx-auto max-w-7xl scroll-mt-20 px-5 pt-24 md:pt-32">
+        <Reveal>
+          <h2 className="display max-w-2xl text-3xl md:text-[2.5rem]">Build on it. The SDK ships with the terminal.</h2>
+        </Reveal>
+        <div className="mt-8">
+          <Reveal delay={0.1}>
+            <Sdk />
           </Reveal>
         </div>
       </section>

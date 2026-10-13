@@ -58,9 +58,11 @@ both in JS (`pnpm zk:test`) and onchain (`forge test`, real proofs in `contracts
 
 ```
 apps/web            Next.js 16, Tailwind 4, Web3.js v4 — landing, RFQ terminal, round page, proof inspector
-apps/coordinator    Node 24 service: 3 maker wallets (private strategies), prover, relayer, REST API
+apps/coordinator    Node 24 service: 5 maker wallets (private strategies), prover, relayer, REST API + opening intake
+packages/sdk        @niskala/sdk — trader, maker, reader and prover surfaces over Web3.js (the terminal runs on it)
 packages/zk         noir_wasm compile · bb.js Poseidon2 + UltraHonk prove/verify · verifier + fixture generators
 packages/abi        ABIs exported from Foundry
+packages/pools      Deployment registry (markets, tokens, makers, verifier) per chain
 circuits/best_quote Noir circuit (+ vendored noir-lang/poseidon v0.4.0 in circuits/poseidon)
 contracts           Foundry: RfqMarket.sol, HonkVerifier.sol (generated), MockERC20.sol, Deploy.s.sol, tests
 docs                ARCHITECTURE, DEMO runbook, THREAT_MODEL, SUBMISSION write-up, original build pack
@@ -74,7 +76,7 @@ the circuit compiles through `@noir-lang/noir_wasm` and proves through `@aztec/b
 
 ```bash
 pnpm install
-pnpm check            # zk tests, forge tests (real proofs), typecheck, web build
+pnpm check            # zk tests, sdk tests, forge tests (real proofs), typecheck, web build
 ```
 
 ### Run the demo against Monad testnet
@@ -175,8 +177,29 @@ RPC `https://testnet-rpc.monad.xyz`, explorer `https://testnet.monadvision.com`,
 - Coordinator sees openings (see boundary above). No delivery receipts / slashing for makers who withhold openings.
 - Mock tokens, testnet only.
 
+## SDK
+
+`packages/sdk` is a publishable TypeScript package (`@niskala/sdk`) over Web3.js v4, and the web terminal is built on
+it. Four surfaces: **trader** (`createRfq`, `waitForProof`, `approveUsdc`, `executeRfq`), **maker**
+(`@niskala/sdk/maker`: `MakerClient.ensureDeposit`, `openRounds`, `quote`, which commits onchain and hands the signed
+opening to the prover), **reader** (`CoordinatorClient`: pools, rounds, proofs, public inputs) and **prover**
+(`@niskala/sdk/prover`, re-exporting `@niskala/zk`). Deployed Monad testnet addresses are bundled.
+
+```ts
+import { Niskala } from "@niskala/sdk";
+const niskala = new Niskala({ provider: window.ethereum });
+const { rfqId } = await niskala.createRfq("weth-usdc", amount, { from });
+const proven = await niskala.waitForProof("weth-usdc", rfqId);
+await niskala.executeRfq("weth-usdc", rfqId, { from });
+```
+
+External makers deliver their (price, salt) through `POST /api/pools/:slug/rfq/:id/openings`, signed with the maker key
+(EIP-191); the coordinator accepts an opening only if it recovers to a maker with a commitment in that round and hashes
+to that commitment. Guide and runnable examples: [`packages/sdk/README.md`](packages/sdk/README.md).
+
 ## Tests
 
+- `pnpm sdk:test` — SDK: registry/ABI drift guard, units, opening signature round trip, Poseidon2 commitment parity with `@niskala/zk`, offline maker sealing.
 - `pnpm zk:test` — circuit via JS: A/B/C winners, tie rule, tamper rejection, replay rejection.
 - `nargo test` in `circuits/best_quote` (Linux/WSL; nargo has no Windows build).
 - `forge test --root contracts` — 23 tests including lifecycle with real proofs, wrong-winner/price/commitment/RFQ rejection,

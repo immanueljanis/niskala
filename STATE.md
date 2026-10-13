@@ -37,6 +37,14 @@ Full redesign of every surface after the TrustFlow reference: light palette with
 no borders, tonal tiles, white overlap card, same canvas hero in light tones. See `DESIGN.md` and `docs/DESIGN-REVIEW.md` (v3).
 Screenshots `docs/screenshots/v3-*.png`. Typecheck, build and verifier pass; no console errors; no overflow at 390 px.
 
+## SDK v1 (2026-10-13)
+`packages/sdk` (`@niskala/sdk`): `Niskala` client (trader + reads, Web3.js v4, injected or key), `CoordinatorClient`,
+`@niskala/sdk/maker` (Poseidon2 commitment, signed opening protocol, `MakerClient`), `@niskala/sdk/prover` (re-exports zk).
+Web app `contracts.ts`/`pools.ts`/`api.ts` are now wrappers over the SDK; coordinator accepts signed openings from external
+makers (`POST .../openings`) and lists them in round views. Tests: 7 (drift guard, units, signature, commitment parity, offline
+maker). `pnpm build` emits dist with rewritten extensions. Landing has an SDK section, nav and footer links.
+All 28 deployed contracts (v2 verifier, USDC, 8 markets, 8 tokens, v1 verifier + 8 v1 markets) are Sourcify "match" on Monad testnet.
+
 ## Design v4 (2026-10-13, copy trim + three.js hero)
 Unnecessary copy removed across landing, terminal and round pages (one sentence per idea, no repeated facts).
 Hero replaced by `HeroScene.tsx`: three.js line terrain, simplex noise in the vertex shader, pine proof front every 11 s,
