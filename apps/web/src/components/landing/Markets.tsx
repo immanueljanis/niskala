@@ -12,37 +12,42 @@ function price(p: { stats?: { lastPriceE6: string | null }; referencePriceE6: st
   return { text: fmtPriceE6(p.referencePriceE6), label: "reference" };
 }
 
+const COLS = "md:grid-cols-[1.5fr_1fr_1fr_0.5fr_1.5rem]";
+
 export function Markets() {
-  const { pools, live } = usePools();
+  const { pools } = usePools();
   return (
-    <div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="card overflow-hidden">
+      <div className={`hidden gap-4 px-6 pb-3 pt-5 text-xs text-dim md:grid ${COLS}`}>
+        <span>Market</span>
+        <span className="text-right">Price in USDC</span>
+        <span className="text-right">Maker liquidity</span>
+        <span className="text-right">Rounds</span>
+        <span />
+      </div>
+      <div className="hairline-y">
         {pools.map((p) => {
           const pr = price(p);
           return (
-            <Link key={p.slug} href={`/trade?pool=${p.slug}`} className="tile group flex flex-col gap-5 p-5 transition-colors hover:bg-[#e2e8e5]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <PoolLogo pool={p} size={34} />
-                  <div>
-                    <div className="text-sm text-text">
-                      {p.base.symbol} / USDC
-                    </div>
-                    <div className="text-xs text-dim">{p.tier}</div>
+            <Link key={p.slug} href={`/trade?pool=${p.slug}`} className={`group grid grid-cols-[1fr_auto] items-center gap-4 px-6 py-4 transition-colors hover:bg-bg ${COLS}`}>
+              <div className="flex items-center gap-3">
+                <PoolLogo pool={p} size={32} />
+                <div>
+                  <div className="text-sm text-text">{p.base.symbol} / USDC</div>
+                  <div className="text-xs text-dim">
+                    {p.base.name} · {p.tier}
                   </div>
                 </div>
-                <ArrowUpRight className="h-4 w-4 text-dim transition-colors group-hover:text-text" strokeWidth={1.6} />
               </div>
-              <div>
-                <div className="display text-2xl tabular-nums">{pr.text}</div>
-                <div className="text-xs text-dim">USDC · {pr.label}</div>
+              <div className="text-right">
+                <div className="display text-xl tabular-nums">{pr.text}</div>
+                <div className="text-xs text-dim">{pr.label}</div>
               </div>
-              <div className="flex items-end justify-between text-xs text-muted">
-                <span>
-                  {p.stats ? fmtUnits(p.stats.liquidityBase, p.base.decimals, 0) : p.makerDeposit} {p.base.symbol} maker liquidity
-                </span>
-                <span className="mono">{p.stats ? `${p.stats.rounds} rounds` : live === false ? "" : "…"}</span>
+              <div className="hidden text-right text-sm text-muted md:block">
+                {p.stats ? fmtUnits(p.stats.liquidityBase, p.base.decimals, 0) : p.makerDeposit} {p.base.symbol}
               </div>
+              <div className="mono hidden text-right text-sm text-muted md:block">{p.stats ? p.stats.rounds : "—"}</div>
+              <ArrowUpRight className="hidden h-4 w-4 justify-self-end text-dim transition-colors group-hover:text-text md:block" strokeWidth={1.6} />
             </Link>
           );
         })}

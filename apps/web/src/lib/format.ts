@@ -41,3 +41,9 @@ export function fmtCountdown(deadlineSec: number, nowMs: number): string {
 export function fmtTime(ms: number): string {
   return new Date(ms).toLocaleTimeString("en-US", { hour12: false });
 }
+
+/** "COMMIT_CLOSED" → "Commit closed" for status pills. */
+export function statusLabel(name: string): string {
+  const s = name.replace(/_/g, " ").toLowerCase();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}

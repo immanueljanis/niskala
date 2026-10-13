@@ -8,8 +8,8 @@ import { PoolLogo, TokenLogo } from "@/components/PoolLogo";
 import { Notice, Pill, type Tone, AddressLink } from "@/components/ui";
 import { createRfq, getBlockNumber, getRfq, getRfqCount, getTokenBalance, mintUsdc, type ChainRfq } from "@/lib/chain/contracts";
 import { FAUCET_URL, NETWORK } from "@/lib/chain/network";
-import { fmtPriceE6, fmtUnits, shortAddress, toUnits } from "@/lib/format";
-import { DEFAULT_POOL, POOLS, QUOTE, poolBySlug, type PoolWithStats } from "@/lib/pools";
+import { fmtPriceE6, fmtUnits, shortAddress, statusLabel, toUnits } from "@/lib/format";
+import { DEFAULT_POOL, MAX_SLOTS, POOLS, QUOTE, poolBySlug, type PoolWithStats } from "@/lib/pools";
 import { usePools } from "@/lib/usePools";
 import { useWallet } from "@/lib/wallet";
 
@@ -269,9 +269,11 @@ export default function TradePage() {
                   </div>
                   <div className="flex items-center gap-3">
                     {r.status >= 3 && r.status !== 5 && <span className="mono text-xs text-muted">{fmtPriceE6(r.winningPriceE6)}</span>}
-                    <span className="mono text-xs text-dim">{r.commitmentCount}/3</span>
+                    <span className="mono text-xs text-dim">
+                      {r.commitmentCount}/{MAX_SLOTS}
+                    </span>
                     <Pill tone={statusTone[r.statusName] ?? "neutral"} pulse={r.statusName === "OPEN" || r.statusName === "COMMIT_CLOSED"}>
-                      {r.statusName.replace("_", " ")}
+                      {statusLabel(r.statusName)}
                     </Pill>
                   </div>
                 </Link>

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Boundary } from "@/components/landing/Boundary";
 import { Compare } from "@/components/landing/Compare";
-import { ContractPill } from "@/components/landing/ContractPill";
 import { Faq } from "@/components/landing/Faq";
 import { FlowStepper } from "@/components/landing/FlowStepper";
 import { HeroScene } from "@/components/landing/HeroScene";
@@ -10,12 +9,7 @@ import { Markets } from "@/components/landing/Markets";
 import { Replay } from "@/components/landing/Replay";
 import { Reveal } from "@/components/landing/Reveal";
 import { StatsStrip } from "@/components/landing/StatsStrip";
-
-const MOVES = [
-  { n: "01", label: "Request", href: "#flow" },
-  { n: "02", label: "Seal", href: "#flow" },
-  { n: "03", label: "Prove and settle", href: "#flow" },
-];
+import { POOLS } from "@/lib/pools";
 
 export default function Landing() {
   return (
@@ -25,7 +19,7 @@ export default function Landing() {
           <HeroScene />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-bg to-transparent" />
         </div>
-        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-5 pt-28 text-center md:pt-36">
+        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-5 pt-12 text-center md:pt-16">
           <Reveal>
             <h1 className="display max-w-4xl text-[clamp(2.75rem,7.2vw,5.75rem)]">
               Private quotes.
@@ -47,9 +41,7 @@ export default function Landing() {
             </div>
           </Reveal>
           <Reveal delay={0.26}>
-            <div className="mt-6">
-              <ContractPill />
-            </div>
+            <p className="mt-7 text-[13px] text-dim">On Monad testnet now: {POOLS.length} markets, up to five sealed makers a round.</p>
           </Reveal>
         </div>
 
@@ -60,17 +52,11 @@ export default function Landing() {
                 <div className="label">What happens in a round</div>
                 <h2 className="display mt-3 text-3xl md:text-[2.5rem]">Sealed competition, verified result.</h2>
               </div>
-              <p className="self-end text-[15px] leading-relaxed text-muted">A trader opens an RFQ. Up to five makers commit hidden quotes. One proof picks the best, and the contract settles at that price.</p>
-              <div className="grid gap-3 sm:grid-cols-3 md:col-span-2">
-                {MOVES.map((m) => (
-                  <a key={m.n} href={m.href} className="tile flex items-center justify-between px-5 py-4 text-sm transition-colors hover:bg-[#e2e8e5]">
-                    <span>
-                      <span className="mono mr-3 text-xs text-dim">{m.n}</span>
-                      {m.label}
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-dim" strokeWidth={1.6} />
-                  </a>
-                ))}
+              <div className="self-end">
+                <p className="text-[15px] leading-relaxed text-muted">A trader opens an RFQ. Up to five makers commit hidden quotes. One proof picks the best, and the contract settles at that price.</p>
+                <a href="#flow" className="mt-4 inline-flex items-center gap-1.5 text-sm text-accent underline-offset-4 hover:underline">
+                  Walk through the five moves <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.8} />
+                </a>
               </div>
             </div>
           </Reveal>

@@ -26,19 +26,18 @@ export function StatsStrip() {
   const settled = pools.reduce((acc, p) => acc + (p.stats?.settled ?? 0), 0);
 
   const cells = [
-    { label: "markets on Monad testnet", value: <Count value={pools.length} />, sub: "" },
-    { label: "rounds so far", value: live ? <Count value={rounds} /> : "—", sub: live ? `${settled} settled` : "coordinator offline" },
-    { label: "time to prove", value: <Count value={0.6} decimals={1} suffix=" s" />, sub: "7,232-byte UltraHonk proof" },
-    { label: "verification gas", value: <Count value={5.8} decimals={1} suffix=" M" />, sub: "" },
+    { label: "markets on Monad testnet", value: <Count value={pools.length} /> },
+    { label: live ? `rounds, ${settled} settled` : "rounds", value: live ? <Count value={rounds} /> : "—" },
+    { label: "to prove a round", value: <Count value={0.6} decimals={1} suffix=" s" /> },
+    { label: "gas to verify onchain", value: <Count value={5.8} decimals={1} suffix=" M" /> },
   ];
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-wrap items-baseline gap-x-12 gap-y-5">
       {cells.map((c) => (
-        <div key={c.label} className="tile px-6 py-6">
-          <div className="display text-4xl text-text">{c.value}</div>
-          <div className="mt-2 text-sm text-muted">{c.label}</div>
-          {c.sub && <div className="mt-1 text-xs text-dim">{c.sub}</div>}
+        <div key={c.label} className="flex items-baseline gap-2.5">
+          <span className="display text-3xl text-text">{c.value}</span>
+          <span className="text-sm text-muted">{c.label}</span>
         </div>
       ))}
     </div>

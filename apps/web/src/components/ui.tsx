@@ -26,7 +26,7 @@ const dotClass: Record<Tone, string> = {
 
 export function Pill({ tone = "neutral", children, pulse = false }: { tone?: Tone; children: ReactNode; pulse?: boolean }) {
   return (
-    <span className={`inline-flex h-6 items-center gap-2 rounded-full px-2.5 text-[11px] font-medium tracking-[0.06em] uppercase ${toneClass[tone]}`}>
+    <span className={`inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs ${toneClass[tone]}`}>
       <span className={`h-1.5 w-1.5 rounded-full ${dotClass[tone]} ${pulse ? "animate-blink" : ""}`} />
       {children}
     </span>

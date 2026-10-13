@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { PoolLogo } from "@/components/PoolLogo";
 import { Notice, Pill, type Tone, AddressLink } from "@/components/ui";
-import { fmtCountdown, fmtUnits } from "@/lib/format";
+import { fmtCountdown, fmtUnits, statusLabel } from "@/lib/format";
 import { ExecutePanel } from "./ExecutePanel";
 import { PhaseStrip } from "./PhaseStrip";
 import { ProofInspector } from "./ProofInspector";
@@ -73,7 +73,7 @@ export function RoundClient({ poolSlug, rfqId }: { poolSlug: string; rfqId: stri
         </div>
         <div className="flex items-center gap-3">
           <Pill tone={statusTone[chain.statusName] ?? "neutral"} pulse={status === 1 || status === 2}>
-            {chain.statusName.replace("_", " ")}
+            {statusLabel(chain.statusName)}
           </Pill>
           <Link href={`/trade?pool=${pool.slug}`} className="text-sm text-muted hover:text-text">
             New RFQ
