@@ -51,11 +51,15 @@ export class MarketMaker {
     return (midE6 * BigInt(10_000 + bps)) / 10_000n;
   }
 
-  async sealAndCommit(pool: Pool, rfqId: bigint, priceE6: bigint) {
+  /** Builds the sealed quote locally. The opening (price, salt) is recorded by the watcher before the commit is sent. */
+  async seal(pool: Pool, rfqId: bigint, priceE6: bigint) {
     const salt = BigInt(`0x${randomBytes(31).toString("hex")}`);
     const commitment = await quoteCommitment({ domain: pool.domain, rfqId, maker: this.address, priceE6, salt });
-    const tx = await sendTx(pool.market.methods.commit(rfqId, toHex32(commitment)), this.address, { gas: COMMIT_GAS });
-    return { commitment, salt, ...tx };
+    return { commitment, salt };
+  }
+
+  commit(pool: Pool, rfqId: bigint, commitment: bigint) {
+    return sendTx(pool.market.methods.commit(rfqId, toHex32(commitment)), this.address, { gas: COMMIT_GAS });
   }
 }
 

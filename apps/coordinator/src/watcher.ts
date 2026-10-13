@@ -41,8 +41,9 @@ async function maybeCommit(pool: Pool, rfq: ChainRfq) {
       try {
         const { midE6, source } = await referenceMidE6(pool);
         const priceE6 = mm.priceFor(pool.slug, BigInt(rfq.rfqId), midE6);
-        const { salt, txHash, blockNumber } = await mm.sealAndCommit(pool, BigInt(rfq.rfqId), priceE6);
+        const { commitment, salt } = await mm.seal(pool, BigInt(rfq.rfqId), priceE6);
         recordOpening(pool.slug, rfq.rfqId, mm.address, { priceE6: priceE6.toString(), salt: salt.toString() });
+        const { txHash, blockNumber } = await mm.commit(pool, BigInt(rfq.rfqId), commitment);
         const r = ensureRound(pool.slug, rfq.rfqId);
         r.referencePriceE6 = midE6.toString();
         r.commits.push({ maker: mm.address, makerId: mm.id, displayName: mm.displayName, txHash, blockNumber, committedAt: Date.now() });
@@ -67,14 +68,23 @@ async function maybeProve(pool: Pool, rfq: ChainRfq, round: Round) {
   const openings = committed.map((m) => openingFor(round, m));
   if (openings.some((o) => !o)) {
     const missing = committed.filter((m) => !openingFor(round, m));
-    updateRound(pool.slug, rfq.rfqId, { phase: "error", error: `waiting for quote openings from ${missing.join(", ")} (external makers submit them through the SDK; demo makers only if the coordinator was down when they committed)` });
+    const demo = missing.map((a) => makerByAddress(a)).filter((m) => m !== undefined);
+    if (demo.some((m) => inflight.has(`${pool.slug}:${rfq.rfqId}:commit:${m.id}`))) return;
+    if (demo.length > 0) {
+      const lost = demo.map((m) => m.id).join(", ");
+      const expires = new Date(rfq.settleDeadline * 1000).toISOString().slice(11, 19);
+      updateRound(pool.slug, rfq.rfqId, { phase: "error", note: undefined, error: `the openings of ${lost} were lost (coordinator restarted mid-round), so this round cannot be proven; maker collateral is released at ${expires} UTC` });
+      return;
+    }
+    const note = `waiting for ${missing.length} external maker opening${missing.length > 1 ? "s" : ""} (${missing.map((a) => `${a.slice(0, 6)}…${a.slice(-4)}`).join(", ")})`;
+    if (round.note !== note) updateRound(pool.slug, rfq.rfqId, { phase: "closed", error: undefined, note });
     return;
   }
 
   inflight.add(key);
   void (async () => {
     try {
-      updateRound(pool.slug, rfq.rfqId, { phase: "proving", error: undefined });
+      updateRound(pool.slug, rfq.rfqId, { phase: "proving", error: undefined, note: undefined });
       const prices = openings.map((o) => BigInt(o!.priceE6));
       const salts = openings.map((o) => BigInt(o!.salt));
       const winnerIndex = selectWinner(prices);

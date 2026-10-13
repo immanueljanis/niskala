@@ -51,6 +51,8 @@ export interface Round {
   /** Snapshot of final chain facts for pool stats (set when the round reaches a final status). */
   final?: { status: number; usdcPaid: string; winningPriceE6: string; amountOut: string };
   error?: string;
+  /** Neutral status line for the UI (for example: waiting for an external maker's opening). */
+  note?: string;
   updatedAt: number;
 }
 
@@ -77,12 +79,14 @@ export function loadRounds() {
 }
 
 let saveTimer: NodeJS.Timeout | undefined;
+function saveNow() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = undefined;
+  mkdirSync(dirname(config.dataFile), { recursive: true });
+  writeFileSync(config.dataFile, JSON.stringify([...rounds.values()], null, 2));
+}
 function scheduleSave() {
-  saveTimer ??= setTimeout(() => {
-    saveTimer = undefined;
-    mkdirSync(dirname(config.dataFile), { recursive: true });
-    writeFileSync(config.dataFile, JSON.stringify([...rounds.values()], null, 2));
-  }, 200);
+  saveTimer ??= setTimeout(saveNow, 200);
 }
 
 export function getRound(pool: string, rfqId: string): Round | undefined {
@@ -107,11 +111,12 @@ export function updateRound(pool: string, rfqId: string, patch: Partial<Round>) 
   return r;
 }
 
+/** Openings are written to disk immediately: losing one (a hard kill inside the debounce window) makes the round unprovable. */
 export function recordOpening(pool: string, rfqId: string, maker: string, opening: Opening) {
   const r = ensureRound(pool, rfqId);
   r.openings[maker.toLowerCase()] = opening;
   r.updatedAt = Date.now();
-  scheduleSave();
+  saveNow();
 }
 
 export function openingFor(round: Round, maker: string): Opening | undefined {

@@ -124,6 +124,8 @@ export interface RoundView {
     createTxHash?: string;
     settleTxHash?: string;
     error?: string;
+    /** Neutral status line, for example while the prover waits for an external maker's opening. */
+    note?: string;
     updatedAt: number;
   };
   makers: MakerPublic[];

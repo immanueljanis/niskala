@@ -89,6 +89,7 @@ export function RoundClient({ poolSlug, rfqId }: { poolSlug: string; rfqId: stri
 
       {coordinatorOffline && <Notice tone="pending">Coordinator offline: showing onchain state only. Market makers and the prover run inside the coordinator process.</Notice>}
       {offchain.phase === "error" && offchain.error && <Notice tone="error">{offchain.error}</Notice>}
+      {offchain.phase !== "error" && offchain.note && <Notice tone="neutral">{offchain.note}</Notice>}
       {status === 5 && <Notice tone="error">This round was cancelled. Locked maker capital has been released.</Notice>}
 
       {status === 3 && <ExecutePanel view={view} now={now} onSettled={setSettleTx} />}
