@@ -10,6 +10,9 @@ importers:
 
   apps/coordinator:
     dependencies:
+      '@niskala/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@niskala/zk':
         specifier: workspace:*
         version: link:../../packages/zk
@@ -29,6 +32,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@niskala/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       lucide-react:
         specifier: ^1.55.0
         version: 1.55.0(@types/react@19.3.0)(react@19.3.0)
@@ -76,6 +82,27 @@ importers:
   packages/abi: {}
 
   packages/pools: {}
+
+  packages/sdk:
+    devDependencies:
+      '@aztec/bb.js':
+        specifier: 5.2.1
+        version: 5.2.1
+      '@niskala/zk':
+        specifier: workspace:*
+        version: link:../zk
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.19.2
+      tsx:
+        specifier: ^4.23.0
+        version: 4.23.15
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      web3:
+        specifier: ^4.16.0
+        version: 4.16.0(typescript@5.9.3)(zod@3.25.76)
 
   packages/zk:
     dependencies:

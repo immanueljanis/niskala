@@ -7,12 +7,14 @@
     "zk:build": "pnpm --filter @niskala/zk build",
     "zk:fixtures": "pnpm --filter @niskala/zk fixtures",
     "zk:test": "pnpm --filter @niskala/zk test",
-    "abi": "forge inspect --root contracts RfqMarket abi --json > packages/abi/RfqMarket.json && forge inspect --root contracts MockERC20 abi --json > packages/abi/MockERC20.json",
+    "abi": "forge inspect --root contracts RfqMarket abi --json > packages/abi/RfqMarket.json && forge inspect --root contracts MockERC20 abi --json > packages/abi/MockERC20.json && pnpm --filter @niskala/sdk gen",
     "contracts:test": "forge test --root contracts",
     "deploy:monad": "node scripts/deploy-monad.mjs",
     "setup:monad": "pnpm --filter @niskala/coordinator run setup",
     "lifecycle:monad": "pnpm --filter @niskala/coordinator run lifecycle",
-    "check": "pnpm zk:test && forge test --root contracts && pnpm -r --if-present typecheck && pnpm --filter @niskala/web build",
-    "deploy:pools": "node scripts/deploy-pools.mjs"
+    "check": "pnpm zk:test && pnpm sdk:test && forge test --root contracts && pnpm -r --if-present typecheck && pnpm --filter @niskala/web build",
+    "deploy:pools": "node scripts/deploy-pools.mjs",
+    "sdk:test": "pnpm --filter @niskala/sdk test",
+    "sdk:gen": "pnpm --filter @niskala/sdk gen"
   }
 }
