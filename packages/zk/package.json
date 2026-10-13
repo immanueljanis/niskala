@@ -1,0 +1,26 @@
+{
+  "name": "@niskala/zk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "fixtures": "tsx scripts/fixtures.ts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aztec/bb.js": "5.2.1",
+    "@noir-lang/noir_js": "1.0.0-rc.3",
+    "@noir-lang/noir_wasm": "1.0.0-rc.3",
+    "@noir-lang/types": "1.0.0-rc.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.0",
+    "@noble/hashes": "^2.0.0"
+  }
+}
