@@ -1,0 +1,22 @@
+{
+  "name": "@niskala/coordinator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=.env --import tsx src/index.ts",
+    "start": "node --env-file=.env --import tsx src/index.ts",
+    "setup": "node --env-file=.env --import tsx scripts/setup.ts",
+    "typecheck": "tsc --noEmit",
+    "lifecycle": "node --env-file=.env --import tsx scripts/lifecycle.ts"
+  },
+  "dependencies": {
+    "@niskala/zk": "workspace:*",
+    "web3": "^4.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.0"
+  }
+}
