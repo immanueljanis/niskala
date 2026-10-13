@@ -81,18 +81,22 @@ analytics. No token.
 
 ## Sponsor bounties
 
-**Best Use of Envio.** The coordinator's round history is served by Envio HyperSync on Monad testnet
-(`apps/coordinator/src/history.ts`). One paginated query over all eight market contracts returns every round event
-(`RfqCreated`, `QuoteCommitted`, `BestExecutionProven`, `RfqSettled`, `RfqCancelled`) with the `submitProof`
-transaction inputs and block timestamps joined in. From that the coordinator rebuilds, for every round on every
-market: the commitment transactions of every maker including external SDK makers, the proof bytes and verification
-gas recovered from calldata, settlement and cancellation snapshots that drive the pool statistics on the landing
-page and terminal. This replaced the previous `eth_getLogs` scanner, which the public Monad RPC caps at 100 blocks
-per call and which only knew about rounds the running process had seen. A fresh coordinator now reconstructs the
-whole history in seconds; the production coordinator on Railway runs with it enabled. Verify:
-https://coordinator-production-9e0b.up.railway.app/api/health reports `history.source = "envio-hypersync"` with the
-HyperSync endpoint, the indexed height and the event count; code in `apps/coordinator/src/history.ts`, tests in
-`apps/coordinator/test/history.test.ts`.
+**Best Use of Envio.** We use Envio HyperSync on Monad testnet to power the round history in Niskala.
+
+Every round on Niskala produces onchain events: the request, each maker's sealed commitment, the proof verification,
+the settlement. Our coordinator asks HyperSync for all of these events across our 8 market contracts in one query
+(about 1 second for the full history), and uses them to build what users see on the round page and the landing page:
+the transaction link for every commitment, the proof transaction with its gas, the settlement transaction, and the
+per-market stats (rounds, settled, volume).
+
+Before HyperSync we used eth_getLogs, which the public Monad RPC limits to 100 blocks per call. That was slow, and it
+only worked for rounds the running coordinator had seen itself. When we moved the coordinator to a new server, the
+history was gone. With HyperSync the coordinator rebuilds the complete history from the chain at startup and keeps it
+in sync every 20 seconds, so it can be restarted or redeployed anywhere without losing anything.
+
+Verify it live: https://coordinator-production-9e0b.up.railway.app/api/health shows `history.source = "envio-hypersync"`
+with the indexed block height and event count. Code: `apps/coordinator/src/history.ts` (tests in
+`apps/coordinator/test/history.test.ts`).
 
 **Best Community Team Project** (Monad Foundation): selected by the team on the platform.
 
