@@ -1,0 +1,16 @@
+**/node_modules
+**/.next
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+apps/web
+apps/coordinator/data
+contracts/out
+contracts/cache
+contracts/broadcast
+circuits/**/target
+docs
+scratchpad
+.git
+.playwright-mcp

@@ -148,7 +148,7 @@ export function HeroScene({ className = "" }: { className?: string }) {
       const resize = () => {
         const w = host.clientWidth;
         const h = host.clientHeight;
-        renderer.setSize(w, h, false);
+        renderer.setSize(w, h);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
       };

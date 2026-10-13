@@ -80,6 +80,11 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);
