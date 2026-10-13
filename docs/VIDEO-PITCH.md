@@ -20,20 +20,21 @@ Record the browser full screen with your voice over it, or picture-in-picture wi
 
 > "Hi, I'm Immanuel. I built Niskala for Monad Metropolis, track one, Onchain Finance and Trading."
 
-### 2 · The setup (0:10–0:25)
+### 2 · The setup (0:10–0:22)
 
-> "Big trades don't go to an order book. A trader asks a few market makers for a price, and the best one wins. The
-> prices stay private. But look at what the trader can actually check: the price they got. Not the other quotes. Not
-> that the best one really won."
+> "If you want to buy a lot of crypto at once, you don't use a normal exchange. You ask a few trading firms for a
+> price and take the cheapest one."
 
-### 3 · The problem (0:25–0:35)
+### 3 · The problem (0:22–0:30)
 
-> "So every private trade ends with the same four words. Trust me. Best price."
+> "But you never see the other prices. You just hear: trust me, best price."
 
-### 4 · The trap (0:35–0:50)
+### 4 · The trap (0:30–0:50)
 
-> "And today you have to pick one. A public auction lets anyone check the winner, but every losing price leaks. A
-> private RFQ protects the makers, but the trader has to trust whoever picked the winner."
+> "Here's the problem. If those prices go on the blockchain, everyone sees them, and the firms stop giving their best
+> price. If the prices stay hidden, someone in the middle picks the winner, and you just have to believe them.
+>
+> So today you either give up privacy, or you give up proof."
 
 ### 5 · Meet Niskala (0:50–1:05)
 

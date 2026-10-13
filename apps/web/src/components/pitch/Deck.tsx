@@ -77,8 +77,8 @@ const SLIDES: Slide[] = [
     body: (
       <div className="grid w-full max-w-5xl items-center gap-10 md:grid-cols-[1fr_1fr]">
         <div>
-          <Headline>Big trades are quoted in private.</Headline>
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">A trader asks a few market makers for a price. The best one wins. The prices stay private.</p>
+          <Headline>Big trades happen in private.</Headline>
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">You ask a few trading firms for a price and take the cheapest. You never see the others.</p>
         </div>
         <div className="card overflow-hidden">
           <div className="grid grid-cols-[1fr_auto] border-b border-hairline px-5 py-3 text-sm text-text">
@@ -107,7 +107,7 @@ const SLIDES: Slide[] = [
       <div className="flex flex-col items-center text-center">
         <Headline>Every private trade ends with four words.</Headline>
         <div className="display mt-10 text-[clamp(3rem,8vw,6.5rem)] leading-none text-brand">&ldquo;Trust me. Best price.&rdquo;</div>
-        <p className="mt-8 max-w-xl text-lg text-muted">The router picked the winner. The trader cannot check it.</p>
+        <p className="mt-8 max-w-xl text-lg text-muted">Someone picked the winner. You cannot check it.</p>
       </div>
     ),
   },
@@ -115,10 +115,10 @@ const SLIDES: Slide[] = [
     kicker: "The trap",
     body: (
       <div className="w-full max-w-5xl text-center">
-        <Headline>Private, or verifiable. Pick one.</Headline>
+        <Headline>Privacy, or proof. Pick one.</Headline>
         <div className="mt-10 grid gap-4 text-left md:grid-cols-2">
-          <Card icon={Eye} tone="bad" title="Public auction" body="Anyone can check the winner. Every losing price leaks, so makers stop quoting their best." />
-          <Card icon={EyeOff} tone="bad" title="Private RFQ" body="Makers keep their prices. The trader has to trust whoever picked the winner." />
+          <Card icon={Eye} tone="bad" title="Prices on the blockchain" body="Everyone sees every price, so the firms stop giving their best one." />
+          <Card icon={EyeOff} tone="bad" title="Prices hidden" body="Someone in the middle picks the winner. You just have to believe them." />
         </div>
       </div>
     ),
