@@ -39,6 +39,11 @@ export function Footer() {
               </Link>
             </div>
             <div>
+              <Link href="/pitch" className="hover:text-text">
+                Pitch
+              </Link>
+            </div>
+            <div>
               <a href="https://github.com/immanueljanis/niskala/tree/main/packages/sdk" target="_blank" rel="noreferrer" className="hover:text-text">
                 SDK guide
               </a>

@@ -1,108 +1,82 @@
-# Pitch video (≤ 2:00)
+# Pitch video (≤ 2:00, target 1:50)
 
-Form requirement: introduce the team, the problem, and why you are building it. Up to 2 minutes. Target **1:50**.
+Form requirement: introduce the team, the problem you solve, and why you are building it. Up to 2 minutes.
 
-Format: you on camera, black background or a plain wall, plus eight slides that are nothing but a few giant words on
-black. No bullet points. No logos except ours at the end. The slides are punctuation, not content. You are the content.
-
-## The one idea
-
-**Every price with a secret behind it deserves a proof. We built the first market that gives one.**
+**Slides: https://niskala-nu.vercel.app/pitch** (9 slides, arrow keys or space to advance, swipe on mobile).
+Record the browser full screen with your voice over it, or picture-in-picture with your camera in a corner.
 
 ## Prep
 
 | # | Check |
 |---|---|
-| 1 | Camera at eye level, 1080p, landscape. Light in front of you. Dark, plain background. |
-| 2 | Lav mic or phone within 50 cm. Quiet room. Test 5 seconds with headphones. |
-| 3 | Slides exported as 1920×1080 PNGs (list below). Cut to each slide on the word it carries. |
-| 4 | Two product inserts from the demo recording: lanes sealing (8 s), "Best price proven" + receipt (6 s). |
-| 5 | Know the beats, not the words. Record five takes. Keep the one where you sound certain, not excited. |
+| 1 | Chrome, full screen (F11), 1920×1080, zoom 100 %, notifications off. Open `/pitch` on slide 1. |
+| 2 | Mic within 50 cm, quiet room. Optional: webcam bubble bottom-left (Loom or OBS). |
+| 3 | Advance with the right arrow key on the first word of each section below. |
+| 4 | Record three takes, keep the one that sounds like explaining to one person. |
 
-## Slides (white serif text on black, nothing else)
+## Script, slide by slide (≈ 260 words)
 
-1. `Trust me. Best price.`
-2. `Private. Or verifiable. Pick one.`
-3. `Both.`
-4. `Niskala`
-5. `Sealed quotes. One proof. Verified by the contract.`
-6. `7 seconds. On Monad.`
-7. `Live today.`
-8. Brand end card (`docs/brand/niskala-banner.png`)
+### 1 · Title (0:00–0:10)
 
-## Script
+> "Hi, I'm Immanuel. I built Niskala for Monad Metropolis, track one, Onchain Finance and Trading."
 
-### 0:00–0:20 · Hook
+### 2 · The setup (0:10–0:25)
 
-[Camera. Slide 1 on "Trust me."]
+> "Big trades don't go to an order book. A trader asks a few market makers for a price, and the best one wins. The
+> prices stay private. But look at what the trader can actually check: the price they got. Not the other quotes. Not
+> that the best one really won."
 
-> "Picture a fund moving ten million dollars.
->
-> It doesn't go to an order book. It asks three market makers for a price. Private prices. One wins.
->
-> And then the fund hears four words. … Trust me. Best price.
->
-> The entire institutional market runs on those four words."
+### 3 · The problem (0:25–0:35)
 
-### 0:20–0:35 · Who we are
+> "So every private trade ends with the same four words. Trust me. Best price."
 
-[Camera.]
+### 4 · The trap (0:35–0:50)
 
-> "I'm [name]. [One line: what you have built or traded before.] [If a team: 'This is [name], who built [part].']
->
-> We built Niskala, for Monad Metropolis, Track one. Onchain Finance and Trading."
+> "And today you have to pick one. A public auction lets anyone check the winner, but every losing price leaks. A
+> private RFQ protects the makers, but the trader has to trust whoever picked the winner."
 
-### 0:35–1:00 · The problem, sharpened
+### 5 · Meet Niskala (0:50–1:05)
 
-[Slide 2 on "Pick one." Then camera.]
+> "Niskala gives you both. The best price from every maker, and a proof that it really was the best. The losing
+> prices stay secret."
 
-> "Here's the trap. Make the auction public, and every losing price leaks. Market makers hate it, and they're right.
-> Keep it private, and the trader has to trust the middle.
->
-> Private, or verifiable. For twenty years the answer has been: pick one."
+### 6 · How it works (1:05–1:20)
 
-### 1:00–1:25 · The reveal
+> "Four steps. The trader asks. Up to five makers seal a hidden price and lock the full size. A zero-knowledge proof
+> shows the winner is the best in the set, and the market contract checks it. Then one transaction settles the trade."
 
-[Slide 3 "Both." Hold it two full seconds in silence. Then slide 4, then insert: lanes sealing.]
+### 7 · Proof it works (1:20–1:30)
 
-> "… We built both.
->
-> Niskala is a market where the quotes stay sealed, and a zero-knowledge proof shows the winner was the best one in
-> the set. Not a promise from a router. A proof the contract verifies itself. Only the winning price is revealed.
->
-> [Slide 5.] Five makers. Five sealed quotes. One proof. Then it settles in one transaction."
+> "And it's live on Monad today. Eight markets, five makers per round, twenty-seven verified contracts. Every step of
+> this round is a real transaction."
 
-### 1:25–1:40 · Why Monad
+### 8 · Why Monad (1:30–1:40)
 
-[Slide 6. Insert: "Best price proven" and the receipt.]
+> "Verifying the proof costs about six million gas. On Monad, the whole round, quotes, proof and settlement, takes
+> about seven seconds. So the proof lives inside the trade, not after it."
 
-> "That proof costs six million gas. On most chains, that's a tax you pay after the trade.
->
-> On Monad, the whole round, five sealed quotes, the proof, the settlement, takes seven seconds. The proof lives
-> inside the trade. That's why we built it here."
+### 9 · The future (1:40–1:50)
 
-### 1:40–1:50 · Why us, and the close
+> "We think every price with a secret behind it deserves a proof. Niskala. Private quotes, provably best execution."
 
-[Slide 7, then camera, then slide 8.]
+## Delivery notes
 
-> "We've been on the receiving end of 'trust me'. We think every price with a secret behind it deserves a proof.
-> Starting with this one.
->
-> It's live today. Eight markets. Twenty-seven verified contracts. An SDK.
->
-> Niskala. Private quotes. Provably best execution."
-
-## Delivery
-
-- Say it like it is already true. No "we hope", "we try", "basically".
-- Two silences matter: after "Pick one." and after "Both." Do not fill them.
-- The words "trust me" appear three times in the pitch. Say them the same way each time, a little quieter.
-- Keep the honest edge if asked: the prover sees the openings today; the chain, the trader and the other makers never
-  do. That is the roadmap, and the README says so. Never say "trustless".
-- Numbers you may say: 5 makers, 8 markets, 27 verified contracts, 7 seconds, 6 million gas. Nothing else.
-- No music under speech. A single low note under the end card is fine.
+- One idea per slide. If you run long, shorten slide 6 first.
+- Say "the contract checks it" at least once; it is what makes this different from every private RFQ.
+- Never say "trustless" or "fully private". The coordinator sees the quote openings; the README says so. If asked,
+  privacy against the prover is the roadmap.
+- Numbers: 5 makers, 8 markets, 27 verified contracts, about 7 seconds, about 6 million gas. Nothing else.
 
 ## Upload
 
-YouTube, **Unlisted**. Title: `Niskala — pitch (Monad Metropolis)`. Description: same block as the demo video, first
-line replaced with `Pitch for Niskala Markets, Monad Metropolis 2026, Track 01 Onchain Finance & Trading.`
+YouTube, **Unlisted**. Title: `Niskala — pitch (Monad Metropolis)`.
+
+```
+Pitch for Niskala Markets, Monad Metropolis 2026, Track 01 Onchain Finance & Trading.
+
+Slides: https://niskala-nu.vercel.app/pitch
+Live app: https://niskala-nu.vercel.app
+Code: https://github.com/immanueljanis/niskala
+```
+
+Paste the link in the form's **Pitch video** field.
