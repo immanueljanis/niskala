@@ -28,3 +28,4 @@
 | 24 | Circuit and market widened to MAX_SLOTS = 5 with a public `count`; round closes at 5 or at the deadline with ≥ 3 | User asked for more than three makers; variable count keeps the proof over the exact committed set without forcing five commits. Public inputs 10 → 15. |
 | 25 | v2 verifier deployed with `forge script` (auto-links RelationsLib/ZKTranscriptLib); markets with `forge create` | The 5-slot verifier emits external libraries, which `forge create` cannot link. Script path also verifies all pieces on Sourcify. |
 | 26 | v1 contracts left onchain and recorded under `legacy` in the registry | Round #1 receipt stays reachable; nothing is pretended to be new. |
+| 27 | Coordinator round records keyed by market address, legacy records migrated to the v1 addresses | A redeployed pool reused the `slug:rfqId` key and inherited the old proof, so the new round was never proved. |

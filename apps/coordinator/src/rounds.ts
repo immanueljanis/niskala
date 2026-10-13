@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { config } from "./config.ts";
+import { poolBySlug, registry } from "./pools.ts";
 
 export type Phase = "open" | "committing" | "closed" | "proving" | "submitting" | "proven" | "settled" | "cancelled" | "error";
 
@@ -35,6 +36,8 @@ interface Opening {
 
 export interface Round {
   pool: string;
+  /** Market contract address: rounds are keyed by it so a redeployed pool never inherits old records. */
+  market: string;
   rfqId: string;
   phase: Phase;
   commits: CommitRecord[];
@@ -52,12 +55,25 @@ export interface Round {
 }
 
 const rounds = new Map<string, Round>();
-const key = (pool: string, rfqId: string) => `${pool}:${rfqId}`;
+
+function marketOf(pool: string): string {
+  const spec = poolBySlug(pool)?.spec;
+  if (!spec) throw new Error(`unknown pool ${pool}`);
+  return spec.market.toLowerCase();
+}
+
+const key = (market: string, rfqId: string) => `${market.toLowerCase()}:${rfqId}`;
 
 export function loadRounds() {
   if (!existsSync(config.dataFile)) return;
-  const raw = JSON.parse(readFileSync(config.dataFile, "utf8")) as Round[];
-  for (const r of raw) if (r.pool) rounds.set(key(r.pool, r.rfqId), r);
+  const raw = JSON.parse(readFileSync(config.dataFile, "utf8")) as Array<Round & { market?: string }>;
+  const legacy = (registry as { legacy?: { markets?: Record<string, string> } } | undefined)?.legacy?.markets ?? {};
+  for (const r of raw) {
+    if (!r.pool) continue;
+    const market = (r.market ?? legacy[r.pool] ?? "").toLowerCase();
+    if (!market) continue;
+    rounds.set(key(market, r.rfqId), { ...r, market });
+  }
 }
 
 let saveTimer: NodeJS.Timeout | undefined;
@@ -70,14 +86,15 @@ function scheduleSave() {
 }
 
 export function getRound(pool: string, rfqId: string): Round | undefined {
-  return rounds.get(key(pool, rfqId));
+  return rounds.get(key(marketOf(pool), rfqId));
 }
 
 export function ensureRound(pool: string, rfqId: string): Round {
-  let r = rounds.get(key(pool, rfqId));
+  const market = marketOf(pool);
+  let r = rounds.get(key(market, rfqId));
   if (!r) {
-    r = { pool, rfqId, phase: "open", commits: [], openings: {}, updatedAt: Date.now() };
-    rounds.set(key(pool, rfqId), r);
+    r = { pool, market, rfqId, phase: "open", commits: [], openings: {}, updatedAt: Date.now() };
+    rounds.set(key(market, rfqId), r);
     scheduleSave();
   }
   return r;
@@ -101,8 +118,10 @@ export function openingFor(round: Round, maker: string): Opening | undefined {
   return round.openings[maker.toLowerCase()];
 }
 
+/** Rounds of the pool's current market only. */
 export function roundsOf(pool: string): Round[] {
-  return [...rounds.values()].filter((r) => r.pool === pool);
+  const market = marketOf(pool);
+  return [...rounds.values()].filter((r) => r.market === market);
 }
 
 /** What the API may expose: never openings, never losing prices. */
