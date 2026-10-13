@@ -13,7 +13,7 @@ export interface RoundState {
 }
 
 /** Polls the coordinator (chain + offchain view); falls back to a direct chain read when it is down. */
-export function useRound(poolSlug: string, rfqId: string, intervalMs = 1500): RoundState {
+export function useRound(poolSlug: string, rfqId: string, intervalMs = 1000): RoundState {
   const [view, setView] = useState<RoundView | null>(null);
   const [coordinatorOffline, setOffline] = useState(false);
   const [error, setError] = useState<string | null>(null);

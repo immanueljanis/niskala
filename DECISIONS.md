@@ -29,3 +29,5 @@
 | 25 | v2 verifier deployed with `forge script` (auto-links RelationsLib/ZKTranscriptLib); markets with `forge create` | The 5-slot verifier emits external libraries, which `forge create` cannot link. Script path also verifies all pieces on Sourcify. |
 | 26 | v1 contracts left onchain and recorded under `legacy` in the registry | Round #1 receipt stays reachable; nothing is pretended to be new. |
 | 27 | Coordinator round records keyed by market address, legacy records migrated to the v1 addresses | A redeployed pool reused the `slug:rfqId` key and inherited the old proof, so the new round was never proved. |
+| 28 | Reads batched and spread over three RPC endpoints; sends use local nonces, cached fees and fixed commit gas | The official Monad RPC allows ~15 req/s per IP; this took create → PROVEN from ≈ 27 s to ≈ 5 s on a five-maker round. |
+| 29 | Relayer closes/expires rounds after their deadlines | Abandoned rounds otherwise keep maker collateral locked until someone calls the contract. |

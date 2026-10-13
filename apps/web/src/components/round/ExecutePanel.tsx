@@ -9,6 +9,9 @@ import { fmtCountdown, fmtUnits } from "@/lib/format";
 import { useWallet } from "@/lib/wallet";
 import { Notice } from "../ui";
 
+/** One-time unlimited approval so every later execution is a single wallet confirmation. Test USDC only. */
+const MAX_UINT256 = (2n ** 256n - 1n).toString();
+
 export function ExecutePanel({ view, now, onSettled }: { view: RoundView; now: number; onSettled: (txHash: string) => void }) {
   const { chain, pool } = view;
   const { address, balances, connect, wrongNetwork, switchNetwork, refresh } = useWallet();
@@ -41,7 +44,7 @@ export function ExecutePanel({ view, now, onSettled }: { view: RoundView; now: n
     try {
       if (needsApproval) {
         setStep("approving");
-        await approveUsdc(address, pool, cost);
+        await approveUsdc(address, pool, MAX_UINT256);
       }
       setStep("executing");
       const { txHash } = await executeRfq(address, pool, chain.rfqId);
@@ -83,7 +86,7 @@ export function ExecutePanel({ view, now, onSettled }: { view: RoundView; now: n
               {step === "approving" ? "Approve USDC in wallet…" : step === "executing" ? "Confirm execution…" : needsApproval ? "Approve and execute" : "Execute"}
               {step === "idle" && <ArrowRight className="h-4 w-4" strokeWidth={1.8} />}
             </button>
-            {needsApproval && step === "idle" && <span className="text-xs text-white/60">Two confirmations: USDC approval, then execution.</span>}
+            {needsApproval && step === "idle" && <span className="text-xs text-white/60">First time only: one USDC approval, then execution.</span>}
           </>
         )}
       </div>

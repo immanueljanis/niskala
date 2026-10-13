@@ -163,7 +163,7 @@ RPC `https://testnet-rpc.monad.xyz`, explorer `https://testnet.monadvision.com`,
 | Proving time (bb.js WASM, laptop) | 0.5–3 s |
 | Onchain verification gas | ≈ 2.4 M execution (forge) · ≈ 3.5 M on anvil incl. calldata · 5.8 M reported on Monad testnet (≈ 0.6 MON at 102 gwei) |
 | HonkVerifier runtime size | 18.3 KB |
-| Round on Monad | create → 3 commits → proof → execute, typically under a minute |
+| Round on Monad | create → 5 commits (≈ 1.6 s) → proof verified (≈ 5 s) → execute (≈ 7 s) |
 | Markets | 8 (WETH, WBTC, WMON, SOL, LINK, UNI, AAVE, ARB vs USDC) · 5 makers per round |
 
 ## Limitations (hackathon scope)

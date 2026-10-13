@@ -1,8 +1,11 @@
 import { randomBytes } from "node:crypto";
 import { quoteCommitment, toHex32 } from "@niskala/zk";
-import { addWallet, sendWithEstimate, web3 } from "./chain.ts";
+import { addWallet, sendTx, web3 } from "./chain.ts";
 import { config } from "./config.ts";
 import { registry, type Pool } from "./pools.ts";
+
+/** Fixed gas limit for commit(): measured ≈ 130–170k; Monad charges on the limit, so keep it tight. */
+const COMMIT_GAS = 220_000n;
 
 /** Private pricing configuration. Never exposed by the API or UI. */
 interface Strategy {
@@ -51,7 +54,7 @@ export class MarketMaker {
   async sealAndCommit(pool: Pool, rfqId: bigint, priceE6: bigint) {
     const salt = BigInt(`0x${randomBytes(31).toString("hex")}`);
     const commitment = await quoteCommitment({ domain: pool.domain, rfqId, maker: this.address, priceE6, salt });
-    const tx = await sendWithEstimate(pool.market.methods.commit(rfqId, toHex32(commitment)), this.address);
+    const tx = await sendTx(pool.market.methods.commit(rfqId, toHex32(commitment)), this.address, { gas: COMMIT_GAS });
     return { commitment, salt, ...tx };
   }
 }

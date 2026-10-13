@@ -75,7 +75,7 @@ main(domain: pub Field, rfq_id: pub Field, makers: pub [Field;3], commitments: p
 
 `rounds.publicView()` strips `openings` before anything is serialized. There is no endpoint that returns a losing price.
 
-The watcher polls `rfqCount` + `getRfq` for the last 8 rounds every 1.5 s (no log subscriptions). Trader transaction
+The watcher polls every 1 s with one batched `eth_call` request for every pool's `rfqCount` and every active round, spread across three public RPC endpoints (official, Ankr, Monad Foundation) with per-endpoint token buckets; transactions, nonces and gas estimates stay on the official endpoint. Sends use a local nonce manager, cached fees and fixed gas for commits, so a commit is one `eth_sendRawTransaction` plus 0.5 s receipt polls. After a deadline the relayer calls `closeCommit`/`expire` so maker collateral is released. Trader transaction
 hashes for the receipt (`RfqCreated`, `RfqSettled`) are found with `eth_getLogs` in 100-block windows, because the public
 Monad RPC rejects wider ranges; the scan cursor is persisted per round so it resumes instead of re-scanning.
 

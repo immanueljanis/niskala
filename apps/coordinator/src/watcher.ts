@@ -1,5 +1,5 @@
 import { proveBestQuote, selectWinner, verifyBestQuote } from "@niskala/zk";
-import { addWallet, readDomain, readRfq, readRfqCount, sendWithEstimate, Status, web3, type ChainRfq } from "./chain.ts";
+import { abi, addWallet, batchCall, normalizeRfq, readDomain, sendTx, Status, web3, type ChainRfq } from "./chain.ts";
 import { config } from "./config.ts";
 import { makers, makerByAddress } from "./makers.ts";
 import { pools, type Pool } from "./pools.ts";
@@ -13,6 +13,9 @@ const STATS_EVERY_MS = 15_000;
 /** Monad's public RPC limits eth_getLogs to 100 blocks per call. */
 const LOG_WINDOW = 100;
 const LOG_WINDOWS_PER_TICK = 10;
+
+const marketAbi = abi("RfqMarket");
+const getRfqOutputs = marketAbi.find((f) => f.type === "function" && f.name === "getRfq").outputs;
 
 interface PoolState {
   lastCount: bigint;
@@ -95,7 +98,7 @@ async function maybeProve(pool: Pool, rfq: ChainRfq, round: Round) {
       });
       log(`${pool.slug} #${rfq.rfqId}: proof generated in ${proveMs}ms, winner slot ${winnerIndex} (${makerByAddress(rfq.makers[winnerIndex])?.id})`);
 
-      const tx = await sendWithEstimate(pool.market.methods.submitProof(BigInt(rfq.rfqId), winnerIndex, prices[winnerIndex], proof.proof), relayer.address, 1.1);
+      const tx = await sendTx(pool.market.methods.submitProof(BigInt(rfq.rfqId), winnerIndex, prices[winnerIndex], proof.proof), relayer.address, { pad: 1.08 });
       const r = ensureRound(pool.slug, rfq.rfqId);
       updateRound(pool.slug, rfq.rfqId, { phase: "proven", proof: { ...r.proof!, txHash: tx.txHash, blockNumber: tx.blockNumber, gasUsed: tx.gasUsed, submittedAt: Date.now() } });
       log(`${pool.slug} #${rfq.rfqId}: proof verified onchain tx ${tx.txHash} gas ${tx.gasUsed}`);
@@ -140,6 +143,21 @@ async function recordEventTx(pool: Pool, rfq: ChainRfq, round: Round, event: "Rf
   }
 }
 
+/** After a deadline the relayer closes or expires the round so maker collateral is released promptly. */
+async function housekeeping(pool: Pool, rfq: ChainRfq, fn: "closeCommit" | "expire") {
+  const key = `${pool.slug}:${rfq.rfqId}:${fn}`;
+  if (inflight.has(key)) return;
+  inflight.add(key);
+  try {
+    const tx = await sendTx(pool.market.methods[fn](BigInt(rfq.rfqId)), relayer.address, { gas: 200_000n });
+    log(`${pool.slug} #${rfq.rfqId}: ${fn} tx ${tx.txHash}`);
+  } catch (err) {
+    log(`${pool.slug} #${rfq.rfqId}: ${fn} failed:`, (err as Error).message);
+  } finally {
+    inflight.delete(key);
+  }
+}
+
 function chainPhase(rfq: ChainRfq, round: Round) {
   switch (rfq.status) {
     case Status.OPEN:
@@ -158,8 +176,9 @@ function chainPhase(rfq: ChainRfq, round: Round) {
 }
 
 async function refreshStats(pool: Pool) {
-  const available = await Promise.all(makers.map((m) => pool.market.methods.available(m.address).call()));
-  const liquidityBase = available.reduce((acc: bigint, v: unknown) => acc + BigInt(v as string), 0n);
+  const calls = makers.map((m) => ({ to: pool.spec.market, data: pool.market.methods.available(m.address).encodeABI() as string }));
+  const raw = await batchCall(calls);
+  const liquidityBase = raw.reduce((acc, hex) => acc + BigInt(web3.eth.abi.decodeParameter("uint256", hex) as string), 0n);
   const finals = roundsOf(pool.slug).filter((r) => r.final);
   const settledRounds = finals.filter((r) => r.final!.status === Status.SETTLED).sort((a, b) => Number(a.rfqId) - Number(b.rfqId));
   const volumeUsdc = settledRounds.reduce((acc, r) => acc + BigInt(r.final!.usdcPaid), 0n);
@@ -174,45 +193,58 @@ async function refreshStats(pool: Pool) {
   };
 }
 
-async function tickPool(pool: Pool) {
-  const st = state.get(pool.slug)!;
-  const count = await readRfqCount(pool.market);
-  if (count > st.lastCount) {
-    const from = st.lastCount === 0n && count > SEED_BACK ? count - SEED_BACK + 1n : st.lastCount + 1n;
-    for (let id = from; id <= count; id++) st.active.add(id.toString());
-    st.lastCount = count;
-  }
-  for (const id of [...st.active]) {
-    const rfq = await readRfq(pool.market, BigInt(id));
-    const round = ensureRound(pool.slug, rfq.rfqId);
-    if (!round.createTxHash) void recordEventTx(pool, rfq, round, "RfqCreated", "createTxHash");
-    if (rfq.status === Status.SETTLED || rfq.status === Status.CANCELLED) {
-      if (!round.final) updateRound(pool.slug, rfq.rfqId, { final: { status: rfq.status, usdcPaid: rfq.usdcPaid, winningPriceE6: rfq.winningPriceE6, amountOut: rfq.amountOut } });
-      if (rfq.status === Status.SETTLED && !round.settleTxHash) {
-        void recordEventTx(pool, rfq, round, "RfqSettled", "settleTxHash");
-      } else if (round.createTxHash || round.scan?.RfqCreated !== undefined) {
-        st.active.delete(id);
-      }
-      if (round.phase !== chainPhase(rfq, round)) updateRound(pool.slug, rfq.rfqId, { phase: chainPhase(rfq, round) });
-      continue;
+async function processRound(pool: Pool, st: PoolState, rfq: ChainRfq) {
+  const round = ensureRound(pool.slug, rfq.rfqId);
+  if (!round.createTxHash) void recordEventTx(pool, rfq, round, "RfqCreated", "createTxHash");
+  if (rfq.status === Status.SETTLED || rfq.status === Status.CANCELLED) {
+    if (!round.final) updateRound(pool.slug, rfq.rfqId, { final: { status: rfq.status, usdcPaid: rfq.usdcPaid, winningPriceE6: rfq.winningPriceE6, amountOut: rfq.amountOut } });
+    if (rfq.status === Status.SETTLED && !round.settleTxHash) {
+      void recordEventTx(pool, rfq, round, "RfqSettled", "settleTxHash");
+    } else if (round.createTxHash || round.scan?.RfqCreated !== undefined) {
+      st.active.delete(rfq.rfqId);
     }
-    if (rfq.status === Status.OPEN) await maybeCommit(pool, rfq);
-    if (rfq.status === Status.COMMIT_CLOSED) await maybeProve(pool, rfq, round);
-    const phase = chainPhase(rfq, round);
-    if (round.phase !== phase && !inflight.has(`${pool.slug}:${rfq.rfqId}:prove`)) updateRound(pool.slug, rfq.rfqId, { phase });
+    if (round.phase !== chainPhase(rfq, round)) updateRound(pool.slug, rfq.rfqId, { phase: chainPhase(rfq, round) });
+    return;
   }
-  if (Date.now() - st.statsAt > STATS_EVERY_MS) {
-    st.statsAt = Date.now();
-    await refreshStats(pool);
-  }
+  const now = Math.floor(Date.now() / 1000);
+  if (rfq.status === Status.OPEN && now > rfq.commitDeadline) return void housekeeping(pool, rfq, "closeCommit");
+  if ((rfq.status === Status.COMMIT_CLOSED || rfq.status === Status.PROVEN) && now > rfq.settleDeadline) return void housekeeping(pool, rfq, "expire");
+  if (rfq.status === Status.OPEN) await maybeCommit(pool, rfq);
+  if (rfq.status === Status.COMMIT_CLOSED) await maybeProve(pool, rfq, round);
+  const phase = chainPhase(rfq, round);
+  if (round.phase !== phase && !inflight.has(`${pool.slug}:${rfq.rfqId}:prove`)) updateRound(pool.slug, rfq.rfqId, { phase });
 }
 
+/** One tick: a single batched read of every pool's rfqCount plus every active round, then per-round logic. */
 async function tick() {
-  for (const pool of pools) {
+  const counts = await batchCall(pools.map((p) => ({ to: p.spec.market, data: p.market.methods.rfqCount().encodeABI() as string })));
+  const reads: Array<{ pool: Pool; id: string }> = [];
+  pools.forEach((pool, i) => {
+    const st = state.get(pool.slug)!;
+    const count = BigInt(web3.eth.abi.decodeParameter("uint256", counts[i]) as string);
+    if (count > st.lastCount) {
+      const from = st.lastCount === 0n && count > SEED_BACK ? count - SEED_BACK + 1n : st.lastCount + 1n;
+      for (let id = from; id <= count; id++) st.active.add(id.toString());
+      st.lastCount = count;
+    }
+    for (const id of st.active) reads.push({ pool, id });
+  });
+  const raw = await batchCall(reads.map((r) => ({ to: r.pool.spec.market, data: r.pool.market.methods.getRfq(r.id).encodeABI() as string })));
+  for (let i = 0; i < reads.length; i++) {
+    const { pool, id } = reads[i];
+    const decoded = web3.eth.abi.decodeParameters(getRfqOutputs, raw[i]) as any;
+    const rfq = normalizeRfq(id, decoded[0]);
     try {
-      await tickPool(pool);
+      await processRound(pool, state.get(pool.slug)!, rfq);
     } catch (err) {
-      log(`${pool.slug}: tick failed:`, (err as Error).message);
+      log(`${pool.slug} #${id}: processing failed:`, (err as Error).message);
+    }
+  }
+  for (const pool of pools) {
+    const st = state.get(pool.slug)!;
+    if (Date.now() - st.statsAt > STATS_EVERY_MS) {
+      st.statsAt = Date.now();
+      refreshStats(pool).catch((err) => log(`${pool.slug}: stats failed:`, (err as Error).message));
     }
   }
 }
@@ -228,8 +260,13 @@ export async function startWatcher() {
   log(`watcher: chain ${config.chainId} relayer ${relayer.address}`);
   for (const mm of makers) log(`watcher: ${mm.id} ${mm.address}`);
   const loop = async () => {
-    await tick();
-    setTimeout(loop, config.pollMs);
+    const t0 = Date.now();
+    try {
+      await tick();
+    } catch (err) {
+      log("tick failed:", (err as Error).message);
+    }
+    setTimeout(loop, Math.max(200, config.pollMs - (Date.now() - t0)));
   };
   void loop();
 }
