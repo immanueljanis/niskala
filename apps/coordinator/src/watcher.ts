@@ -67,7 +67,7 @@ async function maybeProve(pool: Pool, rfq: ChainRfq, round: Round) {
   const openings = committed.map((m) => openingFor(round, m));
   if (openings.some((o) => !o)) {
     const missing = committed.filter((m) => !openingFor(round, m));
-    updateRound(pool.slug, rfq.rfqId, { phase: "error", error: `missing quote openings for ${missing.join(", ")} (coordinator was not running when they committed)` });
+    updateRound(pool.slug, rfq.rfqId, { phase: "error", error: `waiting for quote openings from ${missing.join(", ")} (external makers submit them through the SDK; demo makers only if the coordinator was down when they committed)` });
     return;
   }
 

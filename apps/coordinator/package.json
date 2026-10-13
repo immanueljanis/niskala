@@ -11,6 +11,7 @@
     "lifecycle": "node --env-file=.env --import tsx scripts/lifecycle.ts"
   },
   "dependencies": {
+    "@niskala/sdk": "workspace:*",
     "@niskala/zk": "workspace:*",
     "web3": "^4.16.0"
   },

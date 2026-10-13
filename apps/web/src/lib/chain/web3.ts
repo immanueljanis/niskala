@@ -1,9 +1,8 @@
-import { Web3 } from "web3";
-import { NETWORK, RPC_URL } from "./network";
+import { NETWORK } from "./network";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-type Eip1193 = {
+export type Eip1193 = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
   on?: (event: string, handler: (...args: any[]) => void) => void;
   removeListener?: (event: string, handler: (...args: any[]) => void) => void;
@@ -15,23 +14,9 @@ declare global {
   }
 }
 
-let readWeb3: Web3 | undefined;
-
-/** Read-only client over the public RPC. Works without a wallet. */
-export function getReadWeb3(): Web3 {
-  readWeb3 ??= new Web3(RPC_URL);
-  return readWeb3;
-}
-
 export function getInjectedProvider(): Eip1193 | null {
   if (typeof window === "undefined") return null;
   return window.ethereum ?? null;
-}
-
-/** Wallet-backed client over the injected provider (MetaMask etc.). */
-export function getInjectedWeb3(): Web3 | null {
-  const provider = getInjectedProvider();
-  return provider ? new Web3(provider as any) : null;
 }
 
 export async function requestAccounts(): Promise<string[]> {

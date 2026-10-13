@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@niskala/sdk": "workspace:*",
     "lucide-react": "^1.55.0",
     "motion": "^14.1.0",
     "next": "^16.0.0",
