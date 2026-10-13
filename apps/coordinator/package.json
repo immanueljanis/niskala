@@ -12,7 +12,6 @@
     "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "@envio-dev/hypersync-client": "1.4.1",
     "@niskala/sdk": "workspace:*",
     "@niskala/zk": "workspace:*",
     "web3": "^4.16.0"

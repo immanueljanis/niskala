@@ -40,7 +40,7 @@ Screenshots `docs/screenshots/v3-*.png`. Typecheck, build and verifier pass; no 
 ## History v1 (2026-10-14, Envio HyperSync)
 `apps/coordinator/src/history.ts`: paginated HyperSync query over all markets (5 events + submitProof calldata + block times),
 idempotent fold into round records, 20 s sync with 64-block overlap; windowed eth_getLogs stays as fallback without a token.
-Enabled with `ENVIO_API_TOKEN` (Railway). Native client has no Windows binding: lazy import, decode tests run everywhere.
+Enabled with `ENVIO_API_TOKEN` (Railway and local). Uses the HyperSync JSON HTTP API through `fetch`; no native client (its Node package has no Windows build and failed with "run inner query" from Railway).
 Submitted for the "Best Use of Envio" bounty.
 
 ## SDK v1 (2026-10-13)

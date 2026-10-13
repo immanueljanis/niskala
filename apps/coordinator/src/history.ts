@@ -1,4 +1,3 @@
-import type { HypersyncClient, Log, Query } from "@envio-dev/hypersync-client";
 import { abi, web3 } from "./chain.ts";
 import { config } from "./config.ts";
 import { makerByAddress } from "./makers.ts";
@@ -8,10 +7,11 @@ import { ensureRound, updateRound, type ProofRecord } from "./rounds.ts";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * Round history from Envio HyperSync. Every RfqMarket event across all markets is fetched in one paginated query
- * (no 100-block eth_getLogs windows), together with the submitProof transaction inputs and block timestamps, and
- * folded into the round records: commit transactions (including external makers), the proof bytes and gas, the
- * settlement, cancellations. A fresh host rebuilds the full history in seconds instead of inheriting a data file.
+ * Round history from Envio HyperSync (JSON HTTP API, https://docs.envio.dev/docs/HyperSync/hypersync-query).
+ * Every RfqMarket event across all markets is fetched in one paginated query (no 100-block eth_getLogs windows),
+ * together with the submitProof transaction inputs and block timestamps, and folded into the round records:
+ * commit transactions (including external makers), the proof bytes and gas, the settlement, cancellations.
+ * A fresh host rebuilds the full history in seconds instead of inheriting a data file.
  */
 const HYPERSYNC: Record<string, string> = { "10143": "https://monad-testnet.hypersync.xyz", "143": "https://143.hypersync.xyz" };
 export const historyEnabled = config.envioApiToken !== "" && HYPERSYNC[config.chainId.toString()] !== undefined;
@@ -20,6 +20,16 @@ const EVENT_NAMES = new Set(["RfqCreated", "QuoteCommitted", "BestExecutionProve
 const events: any[] = abi("RfqMarket").filter((f) => f.type === "event" && EVENT_NAMES.has(f.name));
 const byTopic = new Map<string, any>(events.map((e) => [web3.eth.abi.encodeEventSignature(e).toLowerCase(), e]));
 const SUBMIT_PROOF = web3.eth.abi.encodeFunctionSignature("submitProof(uint256,uint8,uint64,bytes)").toLowerCase();
+
+/** A log as the coordinator consumes it (HyperSync's snake_case rows are mapped onto this). */
+export interface MarketLog {
+  address?: string;
+  topics: Array<string | null | undefined>;
+  data?: string;
+  blockNumber?: number;
+  logIndex?: number;
+  transactionHash?: string;
+}
 
 export interface MarketEvent {
   name: string;
@@ -39,7 +49,17 @@ export interface History {
   height: number;
 }
 
-export function decodeMarketLog(log: Log): MarketEvent | null {
+interface HsResponse {
+  data: Array<{
+    logs?: Array<{ address: string; data?: string; topic0?: string | null; topic1?: string | null; topic2?: string | null; topic3?: string | null; block_number: number; log_index: number; transaction_hash: string }>;
+    transactions?: Array<{ hash: string; input?: string; gas_used?: string | number }>;
+    blocks?: Array<{ number: number; timestamp: string | number }>;
+  }>;
+  next_block: number;
+  archive_height?: number;
+}
+
+export function decodeMarketLog(log: MarketLog): MarketEvent | null {
   const topic0 = log.topics[0]?.toLowerCase();
   const ev = topic0 ? byTopic.get(topic0) : undefined;
   if (!ev || !log.address || !log.transactionHash || log.blockNumber === undefined) return null;
@@ -57,39 +77,46 @@ export function proofFromCalldata(input: string): { proof: string; winnerIndex: 
   return { proof: String(d[3]), winnerIndex: Number(d[1]), winningPriceE6: BigInt(d[2]).toString() };
 }
 
-let client: Promise<HypersyncClient> | undefined;
-/** Loaded lazily: the native binding is only needed when the sync is on, and a host without it must still boot. */
-function hypersync(): Promise<HypersyncClient> {
-  client ??= import("@envio-dev/hypersync-client").then((m) => new m.HypersyncClient({ url: HYPERSYNC[config.chainId.toString()], apiToken: config.envioApiToken }));
-  return client;
+async function query(body: Record<string, unknown>): Promise<HsResponse> {
+  const res = await fetch(`${HYPERSYNC[config.chainId.toString()]}/query`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${config.envioApiToken}`, "content-type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!res.ok) throw new Error(`hypersync ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return (await res.json()) as HsResponse;
 }
+
+const num = (v: string | number | undefined): number | undefined => (v === undefined ? undefined : Number(BigInt(v)));
 
 export async function fetchHistory(fromBlock: number, toBlock?: number): Promise<History> {
   const markets = pools.map((p) => p.spec.market.toLowerCase());
   const out: History = { events: [], txInput: new Map(), blockTime: new Map(), nextBlock: fromBlock, height: fromBlock };
   let from = fromBlock;
   for (let page = 0; page < 500; page++) {
-    const query: Query = {
-      fromBlock: from,
-      toBlock,
+    const res = await query({
+      from_block: from,
+      ...(toBlock === undefined ? {} : { to_block: toBlock }),
       logs: [{ address: markets, topics: [[...byTopic.keys()]] }],
-      fieldSelection: {
-        log: ["Address", "Topic0", "Topic1", "Topic2", "Topic3", "Data", "BlockNumber", "LogIndex", "TransactionHash"],
-        transaction: ["Hash", "Input", "GasUsed"],
-        block: ["Number", "Timestamp"],
+      field_selection: {
+        log: ["address", "topic0", "topic1", "topic2", "topic3", "data", "block_number", "log_index", "transaction_hash"],
+        transaction: ["hash", "input", "gas_used"],
+        block: ["number", "timestamp"],
       },
-    };
-    const res = await (await hypersync()).get(query);
-    for (const l of res.data.logs) {
-      const e = decodeMarketLog(l);
-      if (e) out.events.push(e);
+    });
+    for (const chunk of res.data) {
+      for (const l of chunk.logs ?? []) {
+        const e = decodeMarketLog({ address: l.address, topics: [l.topic0, l.topic1, l.topic2, l.topic3], data: l.data, blockNumber: l.block_number, logIndex: l.log_index, transactionHash: l.transaction_hash });
+        if (e) out.events.push(e);
+      }
+      for (const t of chunk.transactions ?? []) if (t.hash && t.input) out.txInput.set(t.hash.toLowerCase(), { input: t.input, gasUsed: num(t.gas_used) });
+      for (const b of chunk.blocks ?? []) if (b.number !== undefined && b.timestamp !== undefined) out.blockTime.set(b.number, num(b.timestamp) ?? 0);
     }
-    for (const t of res.data.transactions) if (t.hash && t.input) out.txInput.set(t.hash.toLowerCase(), { input: t.input, gasUsed: t.gasUsed === undefined ? undefined : Number(t.gasUsed) });
-    for (const b of res.data.blocks) if (b.number !== undefined && b.timestamp !== undefined) out.blockTime.set(b.number, Number(b.timestamp));
-    out.height = res.archiveHeight ?? res.nextBlock;
-    out.nextBlock = res.nextBlock;
-    if (res.nextBlock >= (toBlock ?? out.height) || res.nextBlock <= from) break;
-    from = res.nextBlock;
+    out.height = res.archive_height ?? res.next_block;
+    out.nextBlock = res.next_block;
+    if (res.next_block >= (toBlock ?? out.height) || res.next_block <= from) break;
+    from = res.next_block;
   }
   out.events.sort((a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex);
   return out;
