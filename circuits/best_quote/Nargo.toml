@@ -1,0 +1,7 @@
+[package]
+name = "best_quote"
+type = "bin"
+authors = ["Niskala Markets"]
+
+[dependencies]
+poseidon = { path = "../poseidon" }
