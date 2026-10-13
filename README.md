@@ -1,210 +1,231 @@
-# Niskala Markets
+<p align="center">
+  <img src="docs/brand/niskala-banner.png" alt="Niskala — Private quotes. Provably best execution." width="100%" />
+</p>
 
-**Private quotes. Provably best execution.**
+<p align="center">
+  <a href="https://niskala-nu.vercel.app"><img alt="Live app" src="https://img.shields.io/badge/live-niskala--nu.vercel.app-163F2F?style=for-the-badge" /></a>
+  <a href="https://testnet.monadvision.com/address/0x22Aaeff3Df06535AeFD92D5475628D2eF61c4FaD"><img alt="Monad testnet" src="https://img.shields.io/badge/Monad-testnet%2010143-836EF9?style=for-the-badge" /></a>
+  <img alt="Contracts verified" src="https://img.shields.io/badge/contracts-27%2F27%20verified-2e7d5b?style=for-the-badge" />
+  <img alt="Proof" src="https://img.shields.io/badge/proof-Noir%20%2B%20UltraHonk-0f1613?style=for-the-badge" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-5b6762?style=for-the-badge" />
+</p>
 
-Monad Metropolis · Track 01 — Onchain Finance & Trading
+<p align="center">
+  <a href="https://niskala-nu.vercel.app">Live app</a> ·
+  <a href="https://niskala-nu.vercel.app/rfq/weth-usdc/2">A settled round</a> ·
+  <a href="docs/DEMO.md">90-second demo script</a> ·
+  <a href="packages/sdk/README.md">SDK</a> ·
+  <a href="docs/ARCHITECTURE.md">Architecture</a> ·
+  <a href="docs/THREAT_MODEL.md">Threat model</a>
+</p>
 
-Niskala is a sealed RFQ market on Monad. Up to five market makers compete for a fixed-size trade
-without publishing their prices. A zero-knowledge proof, verified by a contract on Monad, shows
-that the selected quote is the best valid quote across the complete committed set. Only the winning
-price is revealed, then WETH and USDC settle atomically in the same market contract.
+**Monad Metropolis · Track 01 — Onchain Finance & Trading**
 
-> Existing RFQ: private quotes + trusted routing.
-> Niskala: private quotes + verifiable routing.
+Niskala is a sealed request-for-quote market on Monad. Up to five market makers compete for a fixed-size trade
+without publishing their prices. A zero-knowledge proof, verified by the market contract itself, shows that the
+selected quote is the best valid quote across the complete committed set. Only the winning price is revealed, and
+settlement happens in the same transaction that would otherwise need a trusted router.
 
-## What is real in this build
+> Existing RFQ: private quotes, trusted routing.
+> Niskala: private quotes, **verifiable** routing.
 
-| Piece | Implementation |
+---
+
+## The problem
+
+Professional RFQ venues already keep maker pricing private. The trust gap is in routing: the trader takes the
+router's word that the quote it picked was the best one in the competition it ran. The two known fixes both
+fail someone. A transparent auction fixes routing but publishes every losing price, so makers leak their book over
+time. A private router protects makers but asks the trader to trust it.
+
+## The solution
+
+Make the competition sealed and the result provable.
+
+| Move | Who | What goes onchain | What stays private |
+|---|---|---|---|
+| **1. Request** | trader | pair, size, direction, windows | — |
+| **2. Seal** | up to 5 makers, own wallets | `Poseidon2(domain, rfqId, maker, priceE6, salt)`; full size locked in the maker vault | price, salt |
+| **3. Close** | contract | window closes at 5 commitments, or at the deadline with ≥ 3 | — |
+| **4. Prove** | prover → `HonkVerifier` | winner index, winning price, 7.2 KB UltraHonk proof | every losing price |
+| **5. Settle** | trader | USDC to the winner, asset to the trader, losers unlocked, one tx | — |
+
+The proof states, over the exact set of commitments the contract stored: every opening hashes to its commitment,
+every price is positive, the winning price is ≤ every committed price (first minimum wins ties), and the winning
+price is the winner's own. The contract rebuilds the public inputs from its own storage, so a proof is bound to one
+chain, one market, one RFQ and one commitment set. Replaying it anywhere else fails.
+
+## What makes it useful
+
+- **Traders** get firm, competitive execution plus evidence the router did not play favourites. The receipt links
+  every transaction and the proof.
+- **Makers** compete without putting losing prices on a public book. Strategy and inventory never leave the maker.
+- **Builders** get `@niskala/sdk`: the same client the terminal runs on, with trader, maker, reader and prover
+  surfaces over Web3.js.
+
+## A real round on Monad
+
+WETH/USDC round #2, five makers, as it ran on testnet. Every row is a transaction you can open.
+
+| Step | Transaction |
 |---|---|
-| Sealed quotes | Poseidon2 commitments `H(domain, rfqId, maker, priceE6, salt)` sent onchain by up to five independent maker wallets |
-| Best-execution proof | Noir circuit (`circuits/best_quote`) proved with Barretenberg UltraHonk (`@aztec/bb.js`, keccak/EVM target) |
-| Onchain verification | Generated `HonkVerifier.sol` deployed on Monad; `RfqMarket.submitProof` rebuilds the public inputs from storage and reverts on an invalid proof |
-| Settlement | `RfqMarket.execute`: trader's USDC → winning maker, maker's vaulted WETH → trader, losers' locks released, in one transaction |
-| Frontend | Next.js 16 + Web3.js v4 (isolated in `apps/web/src/lib/chain/`) against the official Monad testnet config |
+| RFQ opened (buy 10 WETH) | [`0x443e541c…`](https://testnet.monadvision.com/tx/0x443e541c09da34a71c1c828a83b9b8e3649e53c3032dac79921bafa7c677e042) |
+| 5 sealed commitments | [`0x5b6216bc…`](https://testnet.monadvision.com/tx/0x5b6216bcc7980cbd3d8499137f8b761b32de876fa1d1152629847f5a6daba04c) [`0x28328ee2…`](https://testnet.monadvision.com/tx/0x28328ee23dcd70d6fb7a165742425bff818be32bf8429986bf2342103d8ecc15) [`0x88439ad4…`](https://testnet.monadvision.com/tx/0x88439ad436d4821f61783e3d470ace348bbce321902d176c9509f3969f02bf67) [`0xd656e6b8…`](https://testnet.monadvision.com/tx/0xd656e6b85f1afac453c60a8282aa17b1e9f0a9c9d2eea927349d15f198e9c5d4) [`0xab98d0f8…`](https://testnet.monadvision.com/tx/0xab98d0f8f8d9196db062ea0863c82b00e1d3aee01786fa92a044fd9b9200d583) |
+| Proof verified onchain (5.83 M gas) | [`0x80d1f0d4…`](https://testnet.monadvision.com/tx/0x80d1f0d473fa286aa956dae2eba8c83f5e8fe60a09f8a539bdbd36754dcce9d0) |
+| Settled at 2,528.00 USDC per WETH | [`0x41978438…`](https://testnet.monadvision.com/tx/0x419784383ed2c25ff844d67e45274416c8f892b8745dbb4315b0886c31b9a764) |
 
-Nothing is mocked except the two test tokens (`MockERC20` with an open `mint` faucet).
+Full receipt and proof inspector: https://niskala-nu.vercel.app/rfq/weth-usdc/2
 
-### Honest privacy boundary
-
-Losing prices and salts never reach the trader, the frontend or the chain. The coordinator process
-that runs the three demo makers and the prover **does** see the quote openings, because it builds
-the witness. Privacy against the coordinator (MPC / FHE / TEE proving) is roadmap, not a claim.
-
-| Data | Visibility |
-|---|---|
-| RFQ pair, size, direction, participating makers | Public |
-| Quote commitments | Public |
-| Winning price, winner, proof, verifier result, settlement tx | Public after proof |
-| Losing prices, salts | Private from trader and chain (known to coordinator/prover) |
-| Maker pricing strategy, inventory model | Private (never leave the maker object) |
-
-## The ZK statement
-
-Public inputs (15 × bytes32, in this order):
-`domain, rfqId, makers[5], commitments[5], count, winnerIndex, winningPriceE6`
-with `domain = (chainId << 160) | marketAddress`.
-
-Private witness: `prices[5]`, `salts[5]` (slots beyond `count` are zero and ignored).
-
-Constraints: `1 <= count <= 5`, `winnerIndex < count`; for every committed slot the opening hashes to its commitment, the price is positive,
-`winningPrice <= prices[i]`, and strictly smaller than every earlier slot (first minimum wins ties); `winningPrice == prices[winnerIndex]`.
-
-Because the contract rebuilds the public inputs from its own storage, a proof is bound to one chain,
-one market, one RFQ and one exact commitment set. Tests show that altering any salt, price,
-commitment, the winner index or the winning price, or replaying the proof on another RFQ, is rejected
-both in JS (`pnpm zk:test`) and onchain (`forge test`, real proofs in `contracts/test/fixtures`).
-
-## Repository
-
-```
-apps/web            Next.js 16, Tailwind 4, Web3.js v4 — landing, RFQ terminal, round page, proof inspector
-apps/coordinator    Node 24 service: 5 maker wallets (private strategies), prover, relayer, REST API + opening intake
-packages/sdk        @niskala/sdk — trader, maker, reader and prover surfaces over Web3.js (the terminal runs on it)
-packages/zk         noir_wasm compile · bb.js Poseidon2 + UltraHonk prove/verify · verifier + fixture generators
-packages/abi        ABIs exported from Foundry
-packages/pools      Deployment registry (markets, tokens, makers, verifier) per chain
-circuits/best_quote Noir circuit (+ vendored noir-lang/poseidon v0.4.0 in circuits/poseidon)
-contracts           Foundry: RfqMarket.sol, HonkVerifier.sol (generated), MockERC20.sol, Deploy.s.sol, tests
-docs                ARCHITECTURE, DEMO runbook, THREAT_MODEL, SUBMISSION write-up, original build pack
-STATE.md · RESEARCH.md · DECISIONS.md   build log, prior-art audit, decision record
-```
-
-## Quick start
-
-Prerequisites: Node ≥ 22 (24 used), pnpm 11, Foundry (`forge`, `cast`, `anvil`). No native `nargo`/`bb` needed:
-the circuit compiles through `@noir-lang/noir_wasm` and proves through `@aztec/bb.js` WASM.
-
-```bash
-pnpm install
-pnpm check            # zk tests, sdk tests, forge tests (real proofs), typecheck, web build
-```
-
-### Run the demo against Monad testnet
-
-1. Copy `apps/coordinator/.env.example` → `apps/coordinator/.env`, fill the maker, relayer and deployer keys
-   (any fresh keys; `cast wallet new`). Fund the deployer with testnet MON from https://faucet.monad.xyz.
-2. Deploy and fund:
-   ```bash
-   pnpm deploy:monad     # deploys mocks + HonkVerifier + RfqMarket, writes addresses to both env files
-   pnpm setup:monad      # tops up makers/relayer/trader with MON, deposits 500 WETH per maker, mints trader USDC
-   ```
-3. Start everything:
-   ```bash
-   pnpm dev              # coordinator on :8787 + web on :3000
-   ```
-4. Open http://localhost:3000 → **Open RFQ Terminal** → connect MetaMask (Monad Testnet is added automatically)
-   → **Mint 100,000 test USDC** → **Request Private Quotes** → watch three sealed commitments land, the proof
-   verify onchain, then **Execute**. The receipt and proof inspector link every transaction on MonadVision.
-   Your wallet needs a little testnet MON for gas: paste its address at https://faucet.monad.xyz (no login needed).
-
-Browser end-to-end without MetaMask (injected test wallet signing with `TRADER_KEY`): run
-`apps/web/test/wallet-e2e.playwright.js` through a Playwright session (see the file header).
-
-Scripted alternative that doubles as the integration test (uses `TRADER_KEY` from `.env`):
-
-```bash
-pnpm lifecycle:monad
-```
-
-### Local rehearsal (anvil)
-
-```bash
-anvil --chain-id 31337                     # terminal 1
-# .env.anvil: same layout as .env but RPC http://127.0.0.1:8545, CHAIN_ID 31337, PORT 8788, anvil key 0 as DEPLOYER_KEY
-cd contracts && DEPLOYER_KEY=... MAKERS=... forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
-cd apps/coordinator && node --env-file=.env.anvil --import tsx scripts/setup.ts
-node --env-file=.env.anvil --import tsx src/index.ts   # terminal 2
-node --env-file=.env.anvil --import tsx scripts/lifecycle.ts
-```
-
-## Markets (Monad testnet)
-
-Eight RFQ markets, each its own `RfqMarket` contract sharing one HonkVerifier ([`0x22Aaeff3…`](https://testnet.monadvision.com/address/0x22Aaeff3Df06535AeFD92D5475628D2eF61c4FaD)), one mock USDC ([`0x9a0653C6…`](https://testnet.monadvision.com/address/0x9a0653C6a22318dE8e89e696422eFD9fE7d7dF1D)) and the same five makers. A round closes at five sealed commitments, or at the commit deadline with at least three. Registry: `packages/pools/pools.json`; logos in `apps/web/public/tokens`; deploy with `pnpm deploy:pools`, fund with `pnpm setup:monad`.
-
-| Market | Tier | Base token | RfqMarket | Maker deposit (each) | Default / max size | Price feed |
-|---|---|---|---|---|---|---|
-| WETH / USDC | Majors | [`0x91F2388e…`](https://testnet.monadvision.com/address/0x91F2388e78906ef91fB7E673A45d21852027B835) | [`0xCB6B0505…`](https://testnet.monadvision.com/address/0xCB6B05059d5Fe13866612Ff1c391Aa812364B609) | 500 WETH | 10 / 100 | CoinGecko `ethereum` |
-| WBTC / USDC | Majors | [`0x12e36137…`](https://testnet.monadvision.com/address/0x12e36137B87431e23429B112Cbd51e7a680196DD) | [`0xB29AF2bD…`](https://testnet.monadvision.com/address/0xB29AF2bD7e086B0347434B5888eB42bF7BA83AeC) | 25 WBTC | 0.5 / 5 | CoinGecko `bitcoin` |
-| WMON / USDC | Monad | [`0xE2958467…`](https://testnet.monadvision.com/address/0xE29584674c46f492663424c5848aAA5C550C9116) | [`0xAa6942Fd…`](https://testnet.monadvision.com/address/0xAa6942Fdf7C2658a662fA48cBb1aD10d5ca9FBD2) | 500,000 WMON | 10000 / 100000 | CoinGecko `monad` |
-| SOL / USDC | Majors | [`0x0b7eA661…`](https://testnet.monadvision.com/address/0x0b7eA6619842625BD56e8Bcf50cEAefF6d935F76) | [`0x49294a48…`](https://testnet.monadvision.com/address/0x49294a487b54Ebe500e1696F535F31267f6e290e) | 5,000 SOL | 100 / 1000 | CoinGecko `solana` |
-| LINK / USDC | DeFi | [`0x3eef804e…`](https://testnet.monadvision.com/address/0x3eef804e7E7f55E972A1E4D8c4ccFC5779db6f23) | [`0x1c65C0Bf…`](https://testnet.monadvision.com/address/0x1c65C0Bf82A25e037e6A04739fB6c3F5A161Fdba) | 25,000 LINK | 500 / 5000 | CoinGecko `chainlink` |
-| UNI / USDC | DeFi | [`0xf9E94B9C…`](https://testnet.monadvision.com/address/0xf9E94B9CD4eD5Ac8F398cCCB4dCDB07F66A0D913) | [`0x2710E1f1…`](https://testnet.monadvision.com/address/0x2710E1f1954fba536E75B5C9d28A9bc809FF7290) | 50,000 UNI | 1000 / 10000 | CoinGecko `uniswap` |
-| AAVE / USDC | DeFi | [`0xC1D4B776…`](https://testnet.monadvision.com/address/0xC1D4B77612310a0879EF2459B7231604C546FAB0) | [`0xBd4C2923…`](https://testnet.monadvision.com/address/0xBd4C2923A62e039C735aF64219ec81994027A75c) | 2,500 AAVE | 50 / 500 | CoinGecko `aave` |
-| ARB / USDC | L2 | [`0x8739f97b…`](https://testnet.monadvision.com/address/0x8739f97b5e575329dEEB3294675c6adAc72B8d60) | [`0x7AED9229…`](https://testnet.monadvision.com/address/0x7AED92298E3294114B2D4497e5Dcb68eCBc329C6) | 250,000 ARB | 5000 / 50000 | CoinGecko `arbitrum` |
-
-All base tokens are 18-decimal mocks with an open `mint`; prices are integer USDC per unit with 6 decimals (`priceE6`), so a 0.0249 USDC WMON quote is `24900`. Every market is Sourcify-verified on MonadVision. The v1 deployment (three fixed slots; RfqMarket [`0x054694A7…`](https://testnet.monadvision.com/address/0x054694A70B61AA6493A14ea729f7044986A30F9D), verifier [`0x4978Ca3B…`](https://testnet.monadvision.com/address/0x4978Ca3B939D93e0611Bc317aD0e923D0FEA6354)) stays onchain and holds round #1.
-
-## Deployment (Monad testnet, chainId 10143)
-
-Deployed 2026-10-13 and verified on MonadVision (Sourcify runtime match):
-
-| Contract | Address |
-|---|---|
-| RfqMarket | [`0x054694A70B61AA6493A14ea729f7044986A30F9D`](https://testnet.monadvision.com/address/0x054694A70B61AA6493A14ea729f7044986A30F9D) |
-| HonkVerifier | [`0x4978Ca3B939D93e0611Bc317aD0e923D0FEA6354`](https://testnet.monadvision.com/address/0x4978Ca3B939D93e0611Bc317aD0e923D0FEA6354) |
-| Mock USDC (6 dec, open mint) | [`0x9a0653C6a22318dE8e89e696422eFD9fE7d7dF1D`](https://testnet.monadvision.com/address/0x9a0653C6a22318dE8e89e696422eFD9fE7d7dF1D) |
-| Mock WETH (18 dec, open mint) | [`0x91F2388e78906ef91fB7E673A45d21852027B835`](https://testnet.monadvision.com/address/0x91F2388e78906ef91fB7E673A45d21852027B835) |
-| Makers (roster) | `0x3cDe2bfeF87f8eFc65FC381219b77B9F4BFc72f4`, `0x2A3780c5A61975117BeEF7BDa931ffB0d795cD9D`, `0x981E3471e32c3dec3E847dcf43364Fa972D34FE9` |
-
-First live round, RFQ #1 (driven from the browser through the Web3.js wallet path):
-create [`0xd999ac25…`](https://testnet.monadvision.com/tx/0xd999ac25d2f37a2804226b83bcd7518c0405f25d4b70fdd85e3a0ca0f56b2539)
-→ three commits → proof verified [`0x61361d73…`](https://testnet.monadvision.com/tx/0x61361d73a9022d6a91947871c67b8328a01459e2e74e2d700bb4e8618709365f)
-→ settled [`0x978ca23d…`](https://testnet.monadvision.com/tx/0x978ca23de830b7ee67e7b0e7d525abc6d57bc1e822d02fd9ff4edbfe6a02d642) (see the receipt on `/rfq/1`).
-
-Addresses are written to `contracts/deployments/10143.json` by `pnpm deploy:monad` and mirrored into
-`apps/coordinator/.env` and `apps/web/.env.local`.
-
-Network values are taken from the official docs (https://docs.monad.xyz/developer-essentials/testnets):
-RPC `https://testnet-rpc.monad.xyz`, explorer `https://testnet.monadvision.com`, faucet `https://faucet.monad.xyz`.
+<p align="center">
+  <img src="docs/screenshots/v5-round-5makers.png" alt="Round page: sealed lanes, proof, receipt" width="100%" />
+</p>
 
 ## Numbers
 
 | Metric | Value |
 |---|---|
-| Proof size | 7,232 bytes (+ 15 public inputs) |
-| Proving time (bb.js WASM, laptop) | 0.5–3 s |
-| Onchain verification gas | ≈ 2.4 M execution (forge) · ≈ 3.5 M on anvil incl. calldata · 5.8 M reported on Monad testnet (≈ 0.6 MON at 102 gwei) |
-| HonkVerifier runtime size | 18.3 KB |
 | Round on Monad | create → 5 commits (≈ 1.6 s) → proof verified (≈ 5 s) → execute (≈ 7 s) |
-| Markets | 8 (WETH, WBTC, WMON, SOL, LINK, UNI, AAVE, ARB vs USDC) · 5 makers per round |
+| Proof | 7,232 bytes + 15 public inputs, UltraHonk (keccak), proved in 0.5–1.4 s with bb.js WASM |
+| Onchain verification | ≈ 5.8 M gas on Monad testnet (≈ 0.65 MON at 102 gwei) |
+| Markets | 8 (WETH, WBTC, WMON, SOL, LINK, UNI, AAVE, ARB vs USDC), 5 makers per round |
+| Contracts | 27 deployed, 27 Sourcify-verified on MonadVision |
+| Tests | 26 Foundry tests with real proofs · 5 circuit tests · 7 SDK tests |
 
-## Limitations (hackathon scope)
+## How it is built
 
-- Up to five maker slots; the circuit takes all five slots plus `count` as public inputs. Arbitrary-size completeness
-  (Merkle root of the eligible set) is V1.
-- One market (WETH/USDC), BUY side, full-fill quotes only.
-- Five simulated makers run inside the coordinator (own wallets and private strategies, but one process).
-- Coordinator sees openings (see boundary above). No delivery receipts / slashing for makers who withhold openings.
-- Mock tokens, testnet only.
+```
+┌──────────────┐  @niskala/sdk (Web3.js)  ┌────────────────────────────┐
+│  apps/web    │ ────────────────────────▶│  RfqMarket.sol × 8 (Monad)  │
+│  Next.js 16  │  createRfq / execute     │  · rounds + commitments     │
+│              │◀───── reads ─────────────│  · maker vault per market   │
+└──────┬───────┘                          │  · submitProof → verifier   │
+       │ REST                             │  · atomic settlement        │
+       ▼                                  └──────────┬─────────────────┘
+┌──────────────────────────────────────┐             │ verify(proof, bytes32[15])
+│  apps/coordinator (Node, Railway)    │             ▼
+│  · 5 demo makers, private strategies │   ┌────────────────────┐
+│  · prover: Noir + bb.js UltraHonk    │   │ HonkVerifier.sol   │ generated by bb.js
+│  · relayer, deadline housekeeping    │   └────────────────────┘
+│  · signed opening intake (SDK makers)│
+└──────────────────────────────────────┘
+```
+
+| Layer | Implementation |
+|---|---|
+| Circuit | Noir 1.0.0-rc.3, `circuits/best_quote`, Poseidon2 commitments, 5 slots + public `count` |
+| Proving | `@aztec/bb.js` UltraHonk (EVM/keccak target) through `@noir-lang/noir_wasm`; no native binaries |
+| Contracts | Foundry: `RfqMarket.sol`, generated `HonkVerifier.sol`, `MockERC20.sol`; 26 tests with real proof fixtures |
+| Coordinator | Node 24, Web3.js v4, multi-endpoint RPC routing with per-endpoint rate limits, batched reads, local nonces |
+| Web | Next.js 16, Tailwind 4, Web3.js v4 isolated in the SDK, three.js hero, Playwright-driven wallet e2e |
+| SDK | `@niskala/sdk`: trader, reader, maker (`/maker`), prover (`/prover`) |
+
+<p align="center">
+  <img src="docs/screenshots/readme-terminal.png" alt="RFQ terminal" width="100%" />
+</p>
+
+## Honest privacy boundary
+
+Losing prices and salts never reach the trader, the frontend or the chain. The coordinator that builds the witness
+**does** see the openings. Privacy against the prover (MPC / FHE / TEE proving) is roadmap, not a claim.
+
+| Data | Visibility |
+|---|---|
+| RFQ pair, size, direction, committed makers, commitment hashes | Public |
+| Winning price, winner, proof, verifier result, settlement | Public after the proof |
+| Losing prices, salts | Private from trader and chain (known to the prover) |
+| Maker pricing strategy, inventory | Private, never leave the maker |
+
+Full table of threats and gaps: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
+
+## Deployed contracts (Monad testnet, chainId 10143)
+
+One `HonkVerifier` ([`0x22Aaeff3…`](https://testnet.monadvision.com/address/0x22Aaeff3Df06535AeFD92D5475628D2eF61c4FaD)),
+one mock USDC ([`0x9a0653C6…`](https://testnet.monadvision.com/address/0x9a0653C6a22318dE8e89e696422eFD9fE7d7dF1D)),
+eight markets. All Sourcify-verified. Registry: [`packages/pools/pools.json`](packages/pools/pools.json).
+
+| Market | Tier | Base token | RfqMarket | Maker deposit | Default / max size |
+|---|---|---|---|---|---|
+| WETH / USDC | Majors | [`0x91F2388e…`](https://testnet.monadvision.com/address/0x91F2388e78906ef91fB7E673A45d21852027B835) | [`0xCB6B0505…`](https://testnet.monadvision.com/address/0xCB6B05059d5Fe13866612Ff1c391Aa812364B609) | 500 WETH | 10 / 100 |
+| WBTC / USDC | Majors | [`0x12e36137…`](https://testnet.monadvision.com/address/0x12e36137B87431e23429B112Cbd51e7a680196DD) | [`0xB29AF2bD…`](https://testnet.monadvision.com/address/0xB29AF2bD7e086B0347434B5888eB42bF7BA83AeC) | 25 WBTC | 0.5 / 5 |
+| WMON / USDC | Monad | [`0xE2958467…`](https://testnet.monadvision.com/address/0xE29584674c46f492663424c5848aAA5C550C9116) | [`0xAa6942Fd…`](https://testnet.monadvision.com/address/0xAa6942Fdf7C2658a662fA48cBb1aD10d5ca9FBD2) | 500,000 WMON | 10,000 / 100,000 |
+| SOL / USDC | Majors | [`0x0b7eA661…`](https://testnet.monadvision.com/address/0x0b7eA6619842625BD56e8Bcf50cEAefF6d935F76) | [`0x49294a48…`](https://testnet.monadvision.com/address/0x49294a487b54Ebe500e1696F535F31267f6e290e) | 5,000 SOL | 100 / 1,000 |
+| LINK / USDC | DeFi | [`0x3eef804e…`](https://testnet.monadvision.com/address/0x3eef804e7E7f55E972A1E4D8c4ccFC5779db6f23) | [`0x1c65C0Bf…`](https://testnet.monadvision.com/address/0x1c65C0Bf82A25e037e6A04739fB6c3F5A161Fdba) | 25,000 LINK | 500 / 5,000 |
+| UNI / USDC | DeFi | [`0xf9E94B9C…`](https://testnet.monadvision.com/address/0xf9E94B9CD4eD5Ac8F398cCCB4dCDB07F66A0D913) | [`0x2710E1f1…`](https://testnet.monadvision.com/address/0x2710E1f1954fba536E75B5C9d28A9bc809FF7290) | 50,000 UNI | 1,000 / 10,000 |
+| AAVE / USDC | DeFi | [`0xC1D4B776…`](https://testnet.monadvision.com/address/0xC1D4B77612310a0879EF2459B7231604C546FAB0) | [`0xBd4C2923…`](https://testnet.monadvision.com/address/0xBd4C2923A62e039C735aF64219ec81994027A75c) | 2,500 AAVE | 50 / 500 |
+| ARB / USDC | L2 | [`0x8739f97b…`](https://testnet.monadvision.com/address/0x8739f97b5e575329dEEB3294675c6adAc72B8d60) | [`0x7AED9229…`](https://testnet.monadvision.com/address/0x7AED92298E3294114B2D4497e5Dcb68eCBc329C6) | 250,000 ARB | 5,000 / 50,000 |
+
+Base tokens are 18-decimal mocks with an open `mint`. Prices are USDC per unit with 6 decimals (`priceE6`). The v1
+deployment (three fixed slots, market [`0x054694A7…`](https://testnet.monadvision.com/address/0x054694A70B61AA6493A14ea729f7044986A30F9D),
+verifier [`0x4978Ca3B…`](https://testnet.monadvision.com/address/0x4978Ca3B939D93e0611Bc317aD0e923D0FEA6354)) stays onchain and holds round #1.
+
+## Try it (judges)
+
+1. Open https://niskala-nu.vercel.app and read the landing page: the live round section replays round #2 with its transactions.
+2. Open the terminal, connect MetaMask. Monad Testnet is added automatically. Gas needs a little testnet MON: paste your address at https://faucet.monad.xyz.
+3. Click **Mint 100,000 test USDC**, pick a market, **Request private quotes**. Five commitments land in about two seconds, the proof is verified onchain a few seconds later, the page scrolls to **Execute**.
+4. Execute. The receipt links the settlement transaction and the proof inspector shows what is public versus private.
+5. Verify any contract on MonadVision, or run the whole loop from a script:
+
+```bash
+pnpm install && pnpm lifecycle:monad   # TRADER_KEY in apps/coordinator/.env, prints explorer links
+```
 
 ## SDK
 
-`packages/sdk` is a publishable TypeScript package (`@niskala/sdk`) over Web3.js v4, and the web terminal is built on
-it. Four surfaces: **trader** (`createRfq`, `waitForProof`, `approveUsdc`, `executeRfq`), **maker**
-(`@niskala/sdk/maker`: `MakerClient.ensureDeposit`, `openRounds`, `quote`, which commits onchain and hands the signed
-opening to the prover), **reader** (`CoordinatorClient`: pools, rounds, proofs, public inputs) and **prover**
-(`@niskala/sdk/prover`, re-exporting `@niskala/zk`). Deployed Monad testnet addresses are bundled.
-
 ```ts
 import { Niskala } from "@niskala/sdk";
+
 const niskala = new Niskala({ provider: window.ethereum });
 const { rfqId } = await niskala.createRfq("weth-usdc", amount, { from });
 const proven = await niskala.waitForProof("weth-usdc", rfqId);
 await niskala.executeRfq("weth-usdc", rfqId, { from });
 ```
 
-External makers deliver their (price, salt) through `POST /api/pools/:slug/rfq/:id/openings`, signed with the maker key
-(EIP-191); the coordinator accepts an opening only if it recovers to a maker with a commitment in that round and hashes
-to that commitment. Guide and runnable examples: [`packages/sdk/README.md`](packages/sdk/README.md).
+Makers use `@niskala/sdk/maker`: `MakerClient.quote()` seals a Poseidon2 commitment, sends the commit transaction
+from the maker wallet and hands the signed opening to the prover. External makers can join any market today.
+Guide and runnable examples: [`packages/sdk/README.md`](packages/sdk/README.md).
 
-## Tests
+## Run it yourself
 
-- `pnpm sdk:test` — SDK: registry/ABI drift guard, units, opening signature round trip, Poseidon2 commitment parity with `@niskala/zk`, offline maker sealing.
-- `pnpm zk:test` — circuit via JS: A/B/C winners, tie rule, tamper rejection, replay rejection.
-- `nargo test` in `circuits/best_quote` (Linux/WSL; nargo has no Windows build).
-- `forge test --root contracts` — 23 tests including lifecycle with real proofs, wrong-winner/price/commitment/RFQ rejection,
-  double execution, expiry unlock, vault accounting.
-- `apps/coordinator/scripts/lifecycle.ts` — scripted end-to-end against a live chain.
+Prerequisites: Node ≥ 22, pnpm 11, Foundry. No native `nargo`/`bb`.
+
+```bash
+pnpm install
+pnpm check            # circuit tests, sdk tests, forge tests with real proofs, typecheck, web build
+pnpm dev              # coordinator on :8787 + web on :3000 (needs apps/coordinator/.env, see .env.example)
+```
+
+Deploy your own markets with `pnpm deploy:pools`, fund makers with `pnpm setup:monad`, host with
+[`docs/DEPLOY.md`](docs/DEPLOY.md) (Railway for the coordinator, Vercel for the web app). Local anvil rehearsal is in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Repository
+
+```
+apps/web            Next.js 16 landing, RFQ terminal, round page, proof inspector
+apps/coordinator    demo makers, prover, relayer, REST API + signed opening intake, Dockerfile
+packages/sdk        @niskala/sdk
+packages/zk         noir_wasm compile · bb.js Poseidon2 + UltraHonk · fixture generators
+packages/abi        ABIs exported from Foundry
+packages/pools      deployment registry per chain
+circuits/best_quote Noir circuit (+ vendored noir-lang/poseidon)
+contracts           Foundry: RfqMarket.sol, HonkVerifier.sol (generated), MockERC20.sol, scripts, tests
+docs                ARCHITECTURE · DEMO · DEPLOY · THREAT_MODEL · SUBMISSION · brand · screenshots
+STATE.md · RESEARCH.md · DECISIONS.md   build log, prior-art audit, 32 recorded decisions
+```
+
+## Roadmap
+
+- Privacy against the prover: MPC or TEE witness generation, then FHE.
+- Arbitrary-size completeness: Merkle root of the eligible maker set as the public input.
+- Maker accountability: delivery receipts, bonds and slashing for withheld openings.
+- Both sides and partial fills; real tokens on Monad mainnet.
+
+## Scope and limitations
+
+Up to five maker slots per round; buy side; full fills; mock tokens on testnet; five demo makers run inside one
+coordinator process (own wallets, private strategies). Everything in this repository was built during the Metropolis
+window (first commit 2026-10-13, see `git log`).
 
 ## License
 

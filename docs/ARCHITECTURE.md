@@ -111,3 +111,17 @@ Monad charges `gas_limit × gas_price`, so the relayer pays ≈ 0.6 MON per proo
 `pnpm setup:monad` funds it with 1.5 MON and the faucet adds 5 MON per request.
 
 Proof generation 0.5–3 s on a laptop (WASM, 8 threads); first proof after start ~1 s extra for backend warm-up.
+
+## Local rehearsal (anvil)
+
+```bash
+anvil --chain-id 31337                     # terminal 1
+# .env.anvil: same layout as .env but RPC http://127.0.0.1:8545, CHAIN_ID 31337, PORT 8788, anvil key 0 as DEPLOYER_KEY
+cd contracts && DEPLOYER_KEY=... MAKERS=... forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
+cd apps/coordinator && node --env-file=.env.anvil --import tsx scripts/setup.ts
+node --env-file=.env.anvil --import tsx src/index.ts   # terminal 2
+node --env-file=.env.anvil --import tsx scripts/lifecycle.ts
+```
+
+The web app follows `NEXT_PUBLIC_CHAIN_ID=31337`; the SDK registry needs the anvil addresses under the `"31337"` key of
+`packages/pools/pools.json` (written by `pnpm deploy:pools` against the local RPC).
