@@ -89,7 +89,10 @@ market: the commitment transactions of every maker including external SDK makers
 gas recovered from calldata, settlement and cancellation snapshots that drive the pool statistics on the landing
 page and terminal. This replaced the previous `eth_getLogs` scanner, which the public Monad RPC caps at 100 blocks
 per call and which only knew about rounds the running process had seen. A fresh coordinator now reconstructs the
-whole history in seconds; the production coordinator on Railway runs with it enabled.
+whole history in seconds; the production coordinator on Railway runs with it enabled. Verify:
+https://coordinator-production-9e0b.up.railway.app/api/health reports `history.source = "envio-hypersync"` with the
+HyperSync endpoint, the indexed height and the event count; code in `apps/coordinator/src/history.ts`, tests in
+`apps/coordinator/test/history.test.ts`.
 
 **Best Community Team Project** (Monad Foundation): selected by the team on the platform.
 

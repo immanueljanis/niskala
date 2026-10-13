@@ -3,6 +3,7 @@ import { recoverOpeningSigner, type MakerPublic, type SignedOpening } from "@nis
 import { quoteCommitment, toHex32 } from "@niskala/zk";
 import { readRfq, Status, web3, type ChainRfq } from "./chain.ts";
 import { config } from "./config.ts";
+import { historyStatus } from "./history.ts";
 import { makers } from "./makers.ts";
 import { poolBySlug, pools, registry, type Pool } from "./pools.ts";
 import { getRound, publicView, recordOpening, updateRound } from "./rounds.ts";
@@ -128,7 +129,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
   if (url.pathname === "/api/health") {
     const block = Number(await web3.eth.getBlockNumber());
-    return json(res, 200, { ok: true, chainId: config.chainId, block, quote: registry!.quote, pools: pools.map((p) => ({ slug: p.slug, market: p.spec.market })), makers: makers.map((m) => m.public()) });
+    return json(res, 200, { ok: true, chainId: config.chainId, block, quote: registry!.quote, pools: pools.map((p) => ({ slug: p.slug, market: p.spec.market })), makers: makers.map((m) => m.public()), history: historyStatus });
   }
   if (url.pathname === "/api/makers") return json(res, 200, makers.map((m) => m.public()));
   if (url.pathname === "/api/pools") return json(res, 200, { quote: registry!.quote, makers: makers.map((m) => m.public()), pools: pools.map((p) => p.public()) });

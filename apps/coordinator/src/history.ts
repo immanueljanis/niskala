@@ -177,11 +177,17 @@ export function applyHistory(h: History): number {
 
 let cursor = config.historyFromBlock;
 
+/** What `/api/health` reports so anyone can check where the round history comes from. */
+export const historyStatus: { source: "envio-hypersync" | "eth_getLogs"; endpoint?: string; fromBlock?: number; height?: number; events?: number; syncedAt?: number } = historyEnabled
+  ? { source: "envio-hypersync", endpoint: HYPERSYNC[config.chainId.toString()], fromBlock: config.historyFromBlock }
+  : { source: "eth_getLogs" };
+
 export async function syncHistory() {
   const from = Math.max(config.historyFromBlock, cursor - 64);
   const h = await fetchHistory(from);
   const changed = applyHistory(h);
   cursor = h.nextBlock;
+  Object.assign(historyStatus, { height: h.height, events: (historyStatus.events ?? 0) + (from === config.historyFromBlock ? h.events.length : 0), syncedAt: Date.now() });
   return { from, events: h.events.length, changed, height: h.height };
 }
 
